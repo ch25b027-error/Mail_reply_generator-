@@ -1,22 +1,28 @@
 import React from 'react';
 
-export default function FilterTabs() {
+interface FilterTabsProps {
+  activeFilter: string;
+  setActiveFilter: (filter: string) => void;
+}
+
+export default function FilterTabs({ activeFilter, setActiveFilter }: FilterTabsProps) {
   const tabs = [
-    { id: 'all', label: 'All', active: true },
-    { id: 'ai-sorted', label: 'AI Sorted - Priority', active: false },
-    { id: 'needs-reply', label: 'Needs Reply', active: false },
-    { id: 'promotions', label: 'Promotions', active: false },
-    { id: 'archived', label: 'Archived', active: false },
+    { id: 'all', label: 'All' },
+    { id: 'ai-sorted', label: 'AI Sorted - Priority' },
+    { id: 'needs-reply', label: 'Needs Reply' },
+    { id: 'promotions', label: 'Promotions' },
+    { id: 'archived', label: 'Archived' },
   ];
 
   return (
-    <div className="flex items-center justify-between mb-4 border-b border-slate-800/50 pb-3">
+    <div className="flex items-center justify-between mb-4 border-b border-slate-800/50 pb-3 overflow-x-auto scrollbar-hide">
       <div className="flex gap-2">
         {tabs.map(tab => (
           <button
             key={tab.id}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              tab.active
+            onClick={() => setActiveFilter(tab.id)}
+            className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${
+              activeFilter === tab.id
                 ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300'
                 : 'border-slate-800 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
             }`}
@@ -25,7 +31,7 @@ export default function FilterTabs() {
           </button>
         ))}
       </div>
-      <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
+      <div className="flex items-center gap-4 text-xs font-medium text-slate-400 ml-4 flex-shrink-0">
         <label className="flex items-center gap-2 cursor-pointer hover:text-slate-200">
           <input type="checkbox" className="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" />
           Select all

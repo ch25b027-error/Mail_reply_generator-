@@ -1,13 +1,30 @@
-import React from 'react';
-import { Sparkles, X, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sparkles, X, CheckCircle2, ChevronRight } from 'lucide-react';
 import EmailReader from './EmailReader';
 import Replygenerator from './Replygenerator';
+import { useEmail } from '../../context/EmailContext';
 
-interface AssistantPanelProps {
-  onClose?: () => void;
-}
+export default function AssistantPanel() {
+  const { selectedEmail, setSelectedEmail } = useEmail();
+  const [isOpen, setIsOpen] = useState(true);
 
-export default function AssistantPanel({ onClose }: AssistantPanelProps) {
+  // If no email selected or panel closed
+  if (!isOpen || !selectedEmail) {
+    if (!isOpen && selectedEmail) {
+      // Small handle to reopen
+      return (
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="h-full border-l border-slate-800 bg-[#0B1120] p-2 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors flex flex-col items-center justify-center"
+        >
+          <ChevronRight className="w-5 h-5 mb-2 -rotate-180" />
+          <span className="writing-vertical text-xs font-semibold uppercase tracking-widest" style={{ writingMode: 'vertical-rl' }}>AI Assistant</span>
+        </button>
+      );
+    }
+    return null;
+  }
+
   return (
     <div className="w-[360px] flex-shrink-0 border-l border-slate-800 bg-[#0B1120] flex flex-col h-full">
       {/* Header */}
@@ -21,11 +38,9 @@ export default function AssistantPanel({ onClose }: AssistantPanelProps) {
             <p className="text-[11px] text-indigo-400 font-medium">Reading selected email</p>
           </div>
         </div>
-        {onClose && (
-          <button onClick={onClose} className="p-1 text-slate-500 hover:text-slate-300 transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-        )}
+        <button onClick={() => setIsOpen(false)} className="p-1 text-slate-500 hover:text-slate-300 transition-colors">
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -46,7 +61,7 @@ export default function AssistantPanel({ onClose }: AssistantPanelProps) {
           </div>
         </div>
 
-        <EmailReader />
+        <EmailReader email={selectedEmail} />
         
         <Replygenerator />
       </div>

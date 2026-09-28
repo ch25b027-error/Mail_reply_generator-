@@ -1,75 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import EmailItem from './EmailItem';
+import { useEmail } from '../../context/EmailContext';
+import { Loader2 } from 'lucide-react';
 
-export default function EmailList() {
-  const emails = [
-    {
-      id: 1,
-      initials: 'MC',
-      sender: 'Maya Chen',
-      subject: 'Q4 launch plan — final review',
-      preview: 'Can you confirm the revised rollout dates before our 3 PM sync?',
-      time: '9:42 AM',
-      tag: 'Urgent',
-      tagColor: 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
-      isActive: true,
-    },
-    {
-      id: 2,
-      initials: 'LI',
-      sender: 'Linear',
-      subject: 'Your workspace weekly digest',
-      preview: '18 issues completed, 6 projects updated, and 4 new comments.',
-      time: '8:15 AM',
-      tag: 'Product',
-      tagColor: 'bg-slate-700/30 text-slate-400 border border-slate-700/50',
-    },
-    {
-      id: 3,
-      initials: 'JW',
-      sender: 'James Wilson',
-      subject: 'Partnership proposal follow-up',
-      preview: 'Following up with the revised terms and implementation timeline...',
-      time: 'Yesterday',
-      tag: 'Needs reply',
-      tagColor: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',
-    },
-    {
-      id: 4,
-      initials: 'ST',
-      sender: 'Stripe',
-      subject: 'Payment received - Invoice #1048',
-      preview: 'Your payment of $2,400.00 was successfully processed.',
-      time: 'Yesterday',
-      tag: 'Receipt',
-      tagColor: 'bg-slate-700/30 text-slate-400 border border-slate-700/50',
-    },
-    {
-      id: 5,
-      initials: 'NA',
-      sender: 'Nora Alvarez',
-      subject: 'Research interview notes',
-      preview: 'I synthesized the five customer calls into key themes and quotes.',
-      time: 'Mon',
-      tag: 'Work',
-      tagColor: 'bg-slate-700/30 text-slate-400 border border-slate-700/50',
-    },
-    {
-      id: 6,
-      initials: 'SH',
-      sender: 'Superhuman',
-      subject: 'The productivity playbook',
-      preview: 'Five habits that help high-performing teams protect focus time.',
-      time: 'Mon',
-      tag: 'Newsletter',
-      tagColor: 'bg-slate-700/30 text-slate-400 border border-slate-700/50',
+interface EmailListProps {
+  activeFilter?: string;
+  searchQuery?: string;
+}
+
+export default function EmailList({ activeFilter, searchQuery }: EmailListProps) {
+  const { emails, selectedEmail, setSelectedEmail } = useEmail();
+  const [isFetching, setIsFetching] = useState(false);
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
+
+  // Simulate fetching when filter changes
+  useEffect(() => {
+    setIsFetching(true);
+    const timer = setTimeout(() => setIsFetching(false), 500);
+    return () => clearTimeout(timer);
+  }, [activeFilter, searchQuery]);
+
+  const toggleSelectEmail = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedEmails([...selectedEmails, id]);
+    } else {
+      setSelectedEmails(selectedEmails.filter(eId => eId !== id));
     }
-  ];
+  };
+
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center py-20 text-indigo-400">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col border border-slate-800/60 rounded-xl overflow-hidden bg-[#0A0F1C]/50">
       {emails.map(email => (
-        <EmailItem key={email.id} {...email} />
+        <EmailItem 
+          key={email.id} 
+          {...email} 
+          isSelected={selectedEmails.includes(email.id)}
+          onSelect={(checked) => toggleSelectEmail(email.id, checked)}
+          isActive={selectedEmail?.id === email.id}
+          onClick={() => setSelectedEmail(email)}
+        />
       ))}
     </div>
   );
