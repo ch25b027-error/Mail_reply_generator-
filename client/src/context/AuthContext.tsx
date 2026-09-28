@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
 interface User {
@@ -12,45 +12,51 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  loginWithGoogle: (authCode: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Axios instance with credentials to send cookies
+const api = axios.create({
+  baseURL: 'http://localhost:5000',
+  withCredentials: true
+});
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const loginWithGoogle = async (authCode: string) => {
-    setIsLoading(true);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await api.get('/api/auth/me');
+        setUser(response.data);
+        setIsAuthenticated(true);
+      } catch (error) {
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const logout = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/google', {
-        code: authCode
-      });
-      
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      
-      setUser(user);
-      setIsAuthenticated(true);
+      await api.post('/api/auth/logout');
+      setUser(null);
+      setIsAuthenticated(false);
+      window.location.href = '/';
     } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+      console.error('Logout failed:', error);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );
