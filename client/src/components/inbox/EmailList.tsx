@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import EmailItem from './EmailItem';
 import { useEmail } from '../../context/EmailContext';
 import { Loader2 } from 'lucide-react';

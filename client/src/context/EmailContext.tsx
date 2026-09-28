@@ -45,12 +45,11 @@ export function EmailProvider({ children }: { children: ReactNode }) {
             setSelectedEmail(response.data[0]);
           }
         } catch (error) {
-          console.error("Failed to fetch emails:", error);
+          console.error('Failed to fetch emails:', error);
         } finally {
           setIsLoadingEmails(false);
         }
       };
-      
       fetchEmails();
     }
   }, [isAuthenticated]);
