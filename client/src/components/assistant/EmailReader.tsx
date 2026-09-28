@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { Email } from '../../context/EmailContext';
+import { type Email } from '../../context/EmailContext';
 
 interface EmailReaderProps {
   email?: Email;
