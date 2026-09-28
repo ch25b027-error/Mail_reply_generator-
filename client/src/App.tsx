@@ -1,14 +1,7 @@
-import { Button } from "@/components/ui/button";
+import Dashboard from './pages/Dashboard';
 
 function App() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <h1 className="text-3xl font-bold">Mail Reply Generator</h1>
-      <Button onClick={() => alert("Shadcn + Tailwind active!")}>
-        Test Button
-      </Button>
-    </div>
-  );
+  return <Dashboard />;
 }
 
 export default App;
