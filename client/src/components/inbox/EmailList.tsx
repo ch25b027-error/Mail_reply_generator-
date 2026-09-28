@@ -9,16 +9,8 @@ interface EmailListProps {
 }
 
 export default function EmailList({ activeFilter, searchQuery }: EmailListProps) {
-  const { emails, selectedEmail, setSelectedEmail } = useEmail();
-  const [isFetching, setIsFetching] = useState(false);
+  const { emails, selectedEmail, setSelectedEmail, isLoadingEmails } = useEmail();
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
-
-  // Simulate fetching when filter changes
-  useEffect(() => {
-    setIsFetching(true);
-    const timer = setTimeout(() => setIsFetching(false), 500);
-    return () => clearTimeout(timer);
-  }, [activeFilter, searchQuery]);
 
   const toggleSelectEmail = (id: string, checked: boolean) => {
     if (checked) {
@@ -28,7 +20,7 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
     }
   };
 
-  if (isFetching) {
+  if (isLoadingEmails) {
     return (
       <div className="flex items-center justify-center py-20 text-indigo-400">
         <Loader2 className="w-8 h-8 animate-spin" />

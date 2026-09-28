@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 
+import emailRoutes from "./routes/emailRoutes.js";
+
 dotenv.config();
 connectDB();
 
@@ -19,6 +21,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/emails", emailRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server running!" });
