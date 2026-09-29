@@ -40,7 +40,7 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
       if (!matchesSearch) return false;
     }
     
-    // 2. Filter by tabs (currently mock logic since we don't have AI classifications yet)
+    // 2. Filter by tabs
     if (activeFilter === 'needs-reply' && !email.subject.toLowerCase().includes('?')) return false;
     if (activeFilter === 'promotions' && !email.sender.toLowerCase().includes('marketing')) return false;
     
