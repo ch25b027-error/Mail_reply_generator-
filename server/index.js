@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import draftRoutes from "./routes/draftRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/emails", emailRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/drafts", draftRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server running!" });

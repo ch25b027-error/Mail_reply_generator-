@@ -39,3 +39,41 @@ export const fetchEmails = async (req, res) => {
     res.status(500).json({ error: 'Failed' });
   }
 };
+
+export const sendEmail = async (req, res) => {
+  try {
+    const { recipient, subject, body } = req.body;
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    
+    const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+    const messageParts = [
+      'From: me',
+      `To: ${recipient}`,
+      'Content-Type: text/plain; charset=utf-8',
+      'MIME-Version: 1.0',
+      `Subject: ${utf8Subject}`,
+      '',
+      body,
+    ];
+    const message = messageParts.join('\n');
+    const encodedMessage = Buffer.from(message)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+      
+    const resData = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: { raw: encodedMessage }
+    });
+    
+    res.json({ success: true, messageId: resData.data.id });
+  } catch (error) {
+    console.error('Error sending email', error);
+    res.status(500).json({ error: 'Failed to send' });
+  }
+};
