@@ -11,10 +11,14 @@ export const fetchEmails = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-    const response = await gmail.users.messages.list({ userId: 'me', maxResults: 15, labelIds: ['INBOX'] });
+    const response = await gmail.users.messages.list({ userId: 'me', labelIds: ['INBOX'], q: 'newer_than:7d', maxResults: 500 });
     const messages = response.data.messages || [];
     if (messages.length === 0) return res.json([]);
-    const emailPromises = messages.map(async (msg) => {
+    const emails = [];
+    const chunkSize = 25;
+    for (let i = 0; i < messages.length; i += chunkSize) {
+      const chunk = messages.slice(i, i + chunkSize);
+      const chunkPromises = chunk.map(async (msg) => {
       const msgData = await gmail.users.messages.get({ userId: 'me', id: msg.id, format: 'full' });
       const payload = msgData.data.payload;
       const headers = payload.headers;
@@ -35,7 +39,10 @@ export const fetchEmails = async (req, res) => {
       const time = (dateHeader ? new Date(dateHeader.value) : new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       return { id: msgData.data.id, sender, initials, subject, preview: msgData.data.snippet, time, body };
     });
-    const emails = await Promise.all(emailPromises);
+      const results = await Promise.all(chunkPromises);
+      emails.push(...results);
+      if (i + chunkSize < messages.length) await new Promise(r => setTimeout(r, 200));
+    }
     res.json(emails);
   } catch (error) {
     console.error('Error fetching emails', error);
@@ -111,11 +118,15 @@ export const fetchSentEmails = async (req, res) => {
     oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
     
-    const response = await gmail.users.messages.list({ userId: 'me', maxResults: 15, labelIds: ['SENT'] });
+    const response = await gmail.users.messages.list({ userId: 'me', labelIds: ['SENT'], q: 'newer_than:7d', maxResults: 500 });
     const messages = response.data.messages || [];
     if (messages.length === 0) return res.json([]);
     
-    const emailPromises = messages.map(async (msg) => {
+    const emails = [];
+    const chunkSize = 25;
+    for (let i = 0; i < messages.length; i += chunkSize) {
+      const chunk = messages.slice(i, i + chunkSize);
+      const chunkPromises = chunk.map(async (msg) => {
       const msgData = await gmail.users.messages.get({ userId: 'me', id: msg.id, format: 'full' });
       const payload = msgData.data.payload;
       const headers = payload.headers || [];
@@ -159,8 +170,10 @@ export const fetchSentEmails = async (req, res) => {
         } : null
       };
     });
-    
-    const emails = await Promise.all(emailPromises);
+      const results = await Promise.all(chunkPromises);
+      emails.push(...results);
+      if (i + chunkSize < messages.length) await new Promise(r => setTimeout(r, 200));
+    }
     res.json(emails);
   } catch (error) {
     console.error('Error fetching sent emails', error);
