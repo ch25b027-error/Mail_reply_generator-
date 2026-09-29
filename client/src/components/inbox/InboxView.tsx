@@ -2,15 +2,21 @@ import React, { useState } from 'react';
 import QuickPrompts from '../header/QuickPrompts';
 import FilterTabs from './FilterTabs';
 import EmailList from './EmailList';
+import Intelligenceview from '../intelligence/Intelligenceview';
+import AnalyzingModal from '../intelligence/AnalyzingModal';
+import { useEmail } from '../../context/EmailContext';
 import { Search, SlidersHorizontal, HelpCircle, Bell, PanelRight } from 'lucide-react';
 
 export default function InboxView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const { isAnalyzingInbox, showIntelligenceDashboard } = useEmail();
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto w-full">
-      {/* Nexus Mail Top Bar (Moved from old CommonBar) */}
+    <div className="flex flex-col h-full max-w-4xl mx-auto w-full relative">
+      {isAnalyzingInbox && <AnalyzingModal />}
+      
+      {/* Nexus Mail Top Bar */}
       <div className="h-14 flex-shrink-0 flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center">
@@ -65,7 +71,11 @@ export default function InboxView() {
       <FilterTabs activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
       
       <div className="flex-1 overflow-y-auto pb-6 scrollbar-hide">
-        <EmailList activeFilter={activeFilter} searchQuery={searchQuery} />
+        {showIntelligenceDashboard ? (
+          <Intelligenceview />
+        ) : (
+          <EmailList activeFilter={activeFilter} searchQuery={searchQuery} />
+        )}
       </div>
     </div>
   );

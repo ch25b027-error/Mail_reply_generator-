@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import ActionCard from './ActionCard';
-import AnalyzingModal from './AnalyzingModal';
 import { Sparkles, ArrowRight, InboxIcon } from 'lucide-react';
 
 export default function Intelligenceview() {
@@ -14,9 +13,7 @@ export default function Intelligenceview() {
   ];
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto w-full items-center justify-center relative">
-      <AnalyzingModal />
-      
+    <div className="flex flex-col h-full max-w-4xl mx-auto w-full items-center justify-center relative py-12">
       <div className="mb-12 text-center flex flex-col items-center">
         <div className="w-16 h-16 bg-[#0c1222] border border-slate-700/50 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/10">
           <InboxIcon className="w-8 h-8 text-indigo-400" strokeWidth={1.5} />

@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
 import { Sparkles, Command, ArrowRight, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { useEmail } from '../../context/EmailContext';
 
 export default function CommonBar() {
   const [promptText, setPromptText] = useState('');
-  const [isExecuting, setIsExecuting] = useState(false);
+  const { isAnalyzingInbox, setIsAnalyzingInbox, setShowIntelligenceDashboard } = useEmail();
 
-  const handleExecute = () => {
+  const handleExecute = async () => {
     if (!promptText.trim()) return;
-    setIsExecuting(true);
+    
+    setIsAnalyzingInbox(true);
     console.log("Executing AI Prompt:", promptText);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsExecuting(false);
+    try {
+      const response = await axios.post('http://localhost:5000/api/ai/command', {
+        prompt: promptText
+      }, {
+        withCredentials: true
+      });
+      console.log("AI Response:", response.data);
+      setShowIntelligenceDashboard(true);
+    } catch (error) {
+      console.error("Command failed:", error);
+    } finally {
+      setIsAnalyzingInbox(false);
       setPromptText('');
-    }, 500);
+    }
   };
 
   return (
@@ -35,10 +47,10 @@ export default function CommonBar() {
         </div>
         <button 
           onClick={handleExecute}
-          disabled={isExecuting || !promptText.trim()}
+          disabled={isAnalyzingInbox || !promptText.trim()}
           className="flex items-center justify-center min-w-[100px] gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
         >
-          {isExecuting ? (
+          {isAnalyzingInbox ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <>

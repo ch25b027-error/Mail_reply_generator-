@@ -47,3 +47,33 @@ Output ONLY the refined email body text. Do not include subject lines, placehold
     res.status(500).json({ error: 'Failed to generate reply' });
   }
 };
+
+export const processCommand = async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json({ error: 'Prompt required' });
+    
+    const systemPrompt = `You are an AI inbox organizer acting on behalf of the user. 
+    The user has issued the following command: "${prompt}"
+    
+    Analyze the command and return a JSON object with a list of 'actions' that should be taken.
+    Example: { "actions": ["Categorize all emails from marketing as Promotions", "Archive emails older than 30 days"] }
+    
+    Respond strictly in valid JSON.`;
+    
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: systemPrompt,
+    });
+    
+    let jsonResponse = response.text;
+    try {
+        jsonResponse = JSON.parse(response.text.replace(/```json\n?|\n?```/g, ''));
+    } catch(e) {}
+    
+    res.json({ result: jsonResponse });
+  } catch (error) {
+    console.error('Error processing command:', error);
+    res.status(500).json({ error: 'Failed to process command' });
+  }
+};

@@ -21,6 +21,10 @@ interface EmailContextType {
   aiActionQueue: any[];
   setAiActionQueue: (queue: any[]) => void;
   isLoadingEmails: boolean;
+  isAnalyzingInbox: boolean;
+  setIsAnalyzingInbox: (val: boolean) => void;
+  showIntelligenceDashboard: boolean;
+  setShowIntelligenceDashboard: (val: boolean) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -31,6 +35,9 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [aiActionQueue, setAiActionQueue] = useState<any[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
+  
+  const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
+  const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -55,7 +62,12 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   return (
-    <EmailContext.Provider value={{ emails, selectedEmail, setSelectedEmail, aiActionQueue, setAiActionQueue, isLoadingEmails }}>
+    <EmailContext.Provider value={{ 
+      emails, selectedEmail, setSelectedEmail, 
+      aiActionQueue, setAiActionQueue, isLoadingEmails,
+      isAnalyzingInbox, setIsAnalyzingInbox,
+      showIntelligenceDashboard, setShowIntelligenceDashboard
+    }}>
       {children}
     </EmailContext.Provider>
   );
