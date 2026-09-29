@@ -35,7 +35,6 @@ export default function DraftsView() {
 
   const handleQuickPrompt = async (prompt: string) => {
     console.log("Triggering bulk AI operation on drafts:", prompt);
-    // In real app, call /api/ai/command
   };
 
   const handleRefine = async () => {
@@ -115,7 +114,6 @@ export default function DraftsView() {
   return (
     <div className="flex h-full w-full relative">
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6">
-        {/* Top Bar */}
         <div className="h-14 flex-shrink-0 flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-slate-100">Drafts</h1>
           <div className="flex items-center gap-4 text-slate-400">
@@ -125,7 +123,6 @@ export default function DraftsView() {
           </div>
         </div>
 
-        {/* Command Bar */}
         <div className="bg-[#0B1120] rounded-xl border border-slate-800 p-4 mb-6 shadow-sm">
           <div className="flex items-center gap-3 bg-slate-900/50 rounded-lg border border-slate-800 p-2 pl-4">
             <Sparkles className="w-5 h-5 text-indigo-400" />
@@ -145,7 +142,6 @@ export default function DraftsView() {
           </div>
         </div>
         
-        {/* Drafts Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="text-xl font-bold text-slate-100">Drafts</h2>
@@ -163,20 +159,18 @@ export default function DraftsView() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex items-center gap-2 mb-4">
           {['All', 'AI Drafted', 'Scheduled'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={\`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors \${filter === f ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300' : 'border-slate-800 text-slate-400 hover:bg-slate-800/50'}\`}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors ${filter === f ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300' : 'border-slate-800 text-slate-400 hover:bg-slate-800/50'}`}
             >
               {f}
             </button>
           ))}
         </div>
 
-        {/* List */}
         <div className="flex-1 overflow-y-auto scrollbar-hide pb-6">
           {isLoading ? (
              <div className="py-12 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-500" /></div>
@@ -188,7 +182,7 @@ export default function DraftsView() {
                 <div 
                   key={draft.id} 
                   onClick={() => setSelectedDraft(draft)}
-                  className={\`flex items-start gap-4 p-4 cursor-pointer border-b border-slate-800/50 transition-colors \${selectedDraft?.id === draft.id ? 'bg-indigo-600/10 border-l-2 border-l-indigo-500' : 'hover:bg-slate-800/30'}\`}
+                  className={`flex items-start gap-4 p-4 cursor-pointer border-b border-slate-800/50 transition-colors ${selectedDraft?.id === draft.id ? 'bg-indigo-600/10 border-l-2 border-l-indigo-500' : 'hover:bg-slate-800/30'}`}
                 >
                   <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                     {draft.recipient.substring(0,2).toUpperCase()}
@@ -197,7 +191,7 @@ export default function DraftsView() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-slate-200 truncate">To: {draft.recipient}</span>
                       {draft.status && (
-                        <span className={\`text-[10px] px-2 py-0.5 rounded-full \${draft.status === 'AI Drafted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}\`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${draft.status === 'AI Drafted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
                           {draft.status}
                         </span>
                       )}
@@ -213,7 +207,6 @@ export default function DraftsView() {
         </div>
       </div>
 
-      {/* AI Writing Studio Panel */}
       {selectedDraft && (
         <div className="w-[380px] flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
           <div className="p-4 border-b border-slate-800 flex items-center justify-between">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, HelpCircle, Bell, PanelRight, CheckCircle, Clock } from 'lucide-react';
+import { Search, HelpCircle, Bell, PanelRight, CheckCircle, Clock, Sparkles } from 'lucide-react';
 
 export default function ActionHistoryView({ navigateToDrafts }: { navigateToDrafts: () => void }) {
   const [actions, setActions] = useState<any[]>([]);
@@ -39,7 +39,6 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
   return (
     <div className="flex h-full w-full relative">
       <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6">
-        {/* Top Bar */}
         <div className="h-14 flex-shrink-0 flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-100">AI Action History</h1>
@@ -52,7 +51,6 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
           </div>
         </div>
 
-        {/* Metrics */}
         <div className="grid grid-cols-4 gap-4 mb-8">
           <div className="bg-[#0B1120] border border-slate-800 rounded-xl p-4">
             <div className="text-xs text-slate-500 mb-1">Actions this week</div>
@@ -72,14 +70,13 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             {['All actions', 'Completed', 'Awaiting approval', 'Last 7 days'].map(f => (
               <button
                 key={f}
                 onClick={() => setTimeFilter(f)}
-                className={\`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors \${timeFilter === f ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300' : 'border-slate-800 bg-[#0B1120] text-slate-400 hover:bg-slate-800/50'}\`}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${timeFilter === f ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300' : 'border-slate-800 bg-[#0B1120] text-slate-400 hover:bg-slate-800/50'}`}
               >
                 {f}
               </button>
@@ -98,14 +95,13 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
           </div>
         </div>
 
-        {/* List */}
         <div className="flex-1 overflow-y-auto scrollbar-hide pb-6">
           <div className="flex flex-col gap-2">
             {filteredActions.map(action => (
               <div 
                 key={action.id} 
                 onClick={() => setSelectedAction(action)}
-                className={\`flex items-center justify-between p-4 rounded-xl cursor-pointer border transition-colors \${selectedAction?.id === action.id ? 'bg-indigo-600/10 border-indigo-500/40' : 'bg-[#0B1120] border-slate-800 hover:border-slate-700'}\`}
+                className={`flex items-center justify-between p-4 rounded-xl cursor-pointer border transition-colors ${selectedAction?.id === action.id ? 'bg-indigo-600/10 border-indigo-500/40' : 'bg-[#0B1120] border-slate-800 hover:border-slate-700'}`}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded bg-teal-500/20 text-teal-400 flex items-center justify-center">
@@ -117,7 +113,7 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className={\`flex items-center gap-1 text-[10px] px-2 py-1 rounded-full \${action.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-indigo-500/10 text-indigo-400'}\`}>
+                  <div className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-full ${action.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
                     {action.status === 'Completed' ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                     {action.status}
                   </div>
@@ -132,7 +128,6 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
         </div>
       </div>
 
-      {/* Action Preview Drawer */}
       {selectedAction && (
         <div className="w-[400px] flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
           <div className="p-6 overflow-y-auto flex-1">
