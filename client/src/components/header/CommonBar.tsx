@@ -5,12 +5,13 @@ import { useEmail } from '../../context/EmailContext';
 
 export default function CommonBar() {
   const [promptText, setPromptText] = useState('');
-  const { isAnalyzingInbox, setIsAnalyzingInbox, setShowIntelligenceDashboard } = useEmail();
+  const { isAnalyzingInbox, setIsAnalyzingInbox, setGlobalSearchQuery } = useEmail();
 
   const handleExecute = async () => {
     if (!promptText.trim()) return;
     
     setIsAnalyzingInbox(true);
+    setGlobalSearchQuery(promptText);
     console.log("Executing AI Prompt:", promptText);
     
     try {
@@ -20,7 +21,7 @@ export default function CommonBar() {
         withCredentials: true
       });
       console.log("AI Response:", response.data);
-      setShowIntelligenceDashboard(true);
+      
     } catch (error) {
       console.error("Command failed:", error);
     } finally {

@@ -8,9 +8,9 @@ import { useEmail } from '../../context/EmailContext';
 import { Search, SlidersHorizontal, HelpCircle, Bell, PanelRight } from 'lucide-react';
 
 export default function InboxView() {
-  const [searchQuery, setSearchQuery] = useState('');
+  
   const [activeFilter, setActiveFilter] = useState('all');
-  const { isAnalyzingInbox, showIntelligenceDashboard } = useEmail();
+  const { isAnalyzingInbox, globalSearchQuery, setGlobalSearchQuery } = useEmail();
 
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto w-full relative">
@@ -52,8 +52,8 @@ export default function InboxView() {
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input 
               type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={globalSearchQuery}
+              onChange={(e) => setGlobalSearchQuery(e.target.value)}
               placeholder="Search mail" 
               className="bg-slate-900/50 border border-slate-800 text-sm text-slate-200 rounded-lg pl-9 pr-12 py-1.5 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 w-64 transition-all"
             />
@@ -71,11 +71,7 @@ export default function InboxView() {
       <FilterTabs activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
       
       <div className="flex-1 overflow-y-auto pb-6 scrollbar-hide">
-        {showIntelligenceDashboard ? (
-          <Intelligenceview />
-        ) : (
-          <EmailList activeFilter={activeFilter} searchQuery={searchQuery} />
-        )}
+        <EmailList activeFilter={activeFilter} searchQuery={globalSearchQuery} />
       </div>
     </div>
   );

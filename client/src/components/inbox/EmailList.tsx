@@ -30,11 +30,13 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
 
   const filteredEmails = emails.filter(email => {
     // 1. Filter by search query
-    if (searchQuery) {
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
       const matchesSearch = 
-        email.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        email.sender.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (email.preview && email.preview.toLowerCase().includes(searchQuery.toLowerCase()));
+        email.subject.toLowerCase().includes(query) || 
+        email.sender.toLowerCase().includes(query) ||
+        email.preview.toLowerCase().includes(query) ||
+        (email.body && email.body.toLowerCase().includes(query));
       
       if (!matchesSearch) return false;
     }

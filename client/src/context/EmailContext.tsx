@@ -24,6 +24,8 @@ interface EmailContextType {
   isAnalyzingInbox: boolean;
   setIsAnalyzingInbox: (val: boolean) => void;
   showIntelligenceDashboard: boolean;
+  globalSearchQuery: string;
+  setGlobalSearchQuery: (val: string) => void;
   setShowIntelligenceDashboard: (val: boolean) => void;
 }
 
@@ -37,7 +39,9 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
-  const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
+  const [showIntelligenceDashboard, setShowIntelligenceDashboard,
+      globalSearchQuery, setGlobalSearchQuery] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
