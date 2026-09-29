@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/sidebar/Sidebar';
 import InboxView from '../components/inbox/InboxView';
 import DraftsView from '../components/drafts/DraftsView';
+import SentView from '../components/sent/SentView';
 import ActionHistoryView from '../components/history/ActionHistoryView';
 import AssistantPanel from '../components/assistant/AssistantPanel';
 
@@ -18,9 +19,10 @@ export default function Dashboard() {
           <main className="flex-1 overflow-y-auto min-w-0 p-6 flex">
             {activeTab === 'inbox' && <InboxView />}
             {activeTab === 'drafts' && <DraftsView />}
+            {activeTab === 'sent' && <SentView navigateToDrafts={() => setActiveTab('drafts')} />}
             {activeTab === 'history' && <ActionHistoryView navigateToDrafts={() => setActiveTab('drafts')} />}
             
-            {activeTab !== 'inbox' && activeTab !== 'drafts' && activeTab !== 'history' && (
+            {activeTab !== 'inbox' && activeTab !== 'drafts' && activeTab !== 'history' && activeTab !== 'sent' && (
               <div className="text-slate-400 p-4 border border-slate-800 rounded-lg m-auto">
                 {activeTab} View Placeholder
               </div>

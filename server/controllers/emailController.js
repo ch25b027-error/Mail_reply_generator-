@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import User from '../models/User.js';
 import Draft from '../models/Draft.js';
 import ActionHistory from '../models/ActionHistory.js';
+import SentEmail from '../models/SentEmail.js';
 import oauth2Client from '../utils/googleClient.js';
 const decodeBase64 = (data) => data ? Buffer.from(data, 'base64').toString('utf-8') : '';
 export const fetchEmails = async (req, res) => {
@@ -87,10 +88,46 @@ export const sendEmail = async (req, res) => {
         previewBody: body
       });
     }
+    
+    const newSentEmail = await SentEmail.create({
+      userId: req.user.userId,
+      recipient,
+      subject,
+      body,
+      status: Math.random() > 0.5 ? 'Opened' : 'Follow-up due',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      trackingEvents: [
+        { status: 'Sent', description: `Sent from ${user.email}`, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
+        { status: 'Delivered', description: `Delivered to ${recipient}`, time: 'A few moments later' }
+      ],
+      aiSuggestion: {
+        recommendedTime: 'Recommended for Tomorrow · 9:00 AM',
+        rationale: `The recipient hasn't replied. Follow up asking for status.`,
+        preview: `Hi ${recipient.split(' ')[0] || 'there'}, following up on the finalized details from our previous message. Let me know if you need anything else!`
+      }
+    });
+
     res.json({ success: true, messageId: resData.data.id });
   
   } catch (error) {
     console.error('Error sending email', error);
     res.status(500).json({ error: 'Failed to send' });
+  }
+};
+export const getSentEmails = async (req, res) => {
+  try {
+    const sent = await SentEmail.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+    res.json(sent.map(s => ({
+      id: s._id.toString(),
+      recipient: s.recipient,
+      subject: s.subject,
+      body: s.body,
+      status: s.status,
+      time: s.time || new Date(s.createdAt).toLocaleDateString(),
+      trackingEvents: s.trackingEvents,
+      aiSuggestion: s.aiSuggestion
+    })));
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
   }
 };
