@@ -36,6 +36,7 @@ Output ONLY the refined email body text. Do not include subject lines, placehold
       prompt += `\nOutput ONLY the raw email body text. Do not include subject lines or conversational filler.`;
     }
 
+    console.log('🚀 CALLING GEMINI API');
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',
       contents: prompt,
@@ -61,6 +62,7 @@ export const processCommand = async (req, res) => {
     
     Respond strictly in valid JSON.`;
     
+    console.log('🚀 CALLING GEMINI API');
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',
       contents: systemPrompt,

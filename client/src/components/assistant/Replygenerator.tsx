@@ -35,12 +35,7 @@ export default function Replygenerator() {
     }
   };
 
-  useEffect(() => {
-    if (selectedEmail && !isGenerating) {
-      setDraftContent('');
-      generateReply(selectedTone);
-    }
-  }, [selectedEmail?.id]);
+  
 
   const handleRefine = () => {
     if (!refinePrompt.trim()) return;
@@ -64,6 +59,14 @@ export default function Replygenerator() {
           <span className="text-xs font-bold text-slate-200 tracking-wide">AI reply generator</span>
         </div>
         
+        <div className="flex gap-2 items-center">
+        <button 
+          onClick={() => generateReply()}
+          disabled={isGenerating}
+          className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600/40 transition-colors flex items-center gap-1"
+        >
+          Generate
+        </button>
         <div 
           onClick={() => setIsToneDropdownOpen(!isToneDropdownOpen)}
           className="relative group cursor-pointer px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 border border-slate-700 text-slate-400 flex items-center gap-1 hover:bg-slate-700 transition-colors"
@@ -87,6 +90,7 @@ export default function Replygenerator() {
               ))}
             </div>
           )}
+        </div>
         </div>
       </div>
       
