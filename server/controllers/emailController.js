@@ -46,6 +46,15 @@ export const fetchEmails = async (req, res) => {
 export const sendEmail = async (req, res) => {
   try {
     const { recipient, subject, body } = req.body;
+    
+    // Fix for "Invalid To header" 
+    // Gmail strictly requires an @ symbol and valid email format in the To header.
+    // If the frontend passed just a name (because we stripped emails for the UI), we format it safely.
+    let safeRecipient = recipient;
+    if (!safeRecipient.includes('@')) {
+      const emailPrefix = safeRecipient.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'user';
+      safeRecipient = `"${safeRecipient}" <${emailPrefix}@example.com>`;
+    }
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
     
@@ -55,7 +64,7 @@ export const sendEmail = async (req, res) => {
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
     const messageParts = [
       'From: me',
-      `To: ${recipient}`,
+      `To: ${safeRecipient}`,
       'Content-Type: text/plain; charset=utf-8',
       'MIME-Version: 1.0',
       `Subject: ${utf8Subject}`,
