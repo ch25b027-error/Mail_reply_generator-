@@ -187,17 +187,7 @@ export const getHistory = async (req, res) => {
   try {
     let actions = await ActionHistory.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     
-    if (actions.length === 0) {
-      // Seed dummy data
-      const mocks = [
-        { title: 'Auto-sorted inbox by priority', description: '147 messages affected', status: 'Completed', time: 'Today, 9:46 AM', previewSubject: 'Auto-Sort Execution Log', previewBody: 'Moved 147 marketing and promotional emails...' },
-        { title: 'Drafted reply to Maya Chen', description: '1 message affected', status: 'Awaiting approval', time: 'Today, 9:43 AM', previewSubject: 'Re: Q4 launch plan - final review', previewBody: 'Hi Maya, confirmed...' }
-      ];
-      for (const m of mocks) {
-        await ActionHistory.create({ ...m, userId: req.user.userId });
-      }
-      actions = await ActionHistory.find({ userId: req.user.userId }).sort({ createdAt: -1 });
-    }
+
     
     const formattedActions = actions.map(a => ({
       id: a._id.toString(),

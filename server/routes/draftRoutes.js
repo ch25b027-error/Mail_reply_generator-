@@ -13,13 +13,7 @@ router.get('/', protect, async (req, res) => {
   try {
     let drafts = await Draft.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     
-    // Seed dummy data if empty so the UI isn't totally blank
-    if (drafts.length === 0) {
-      for (const d of mockDrafts) {
-        await Draft.create({ ...d, userId: req.user.userId });
-      }
-      drafts = await Draft.find({ userId: req.user.userId }).sort({ createdAt: -1 });
-    }
+
     
     // Map _id to id for the frontend
     const formattedDrafts = drafts.map(d => ({
