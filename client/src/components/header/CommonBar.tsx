@@ -8,10 +8,13 @@ export default function CommonBar() {
   const handleExecute = () => {
     if (!promptText.trim()) return;
     setIsExecuting(true);
+    console.log("Executing AI Prompt:", promptText);
+    
+    // Simulate API call
     setTimeout(() => {
       setIsExecuting(false);
       setPromptText('');
-    }, 2000);
+    }, 500);
   };
 
   return (

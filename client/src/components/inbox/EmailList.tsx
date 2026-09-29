@@ -28,18 +28,43 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
     );
   }
 
+  const filteredEmails = emails.filter(email => {
+    // 1. Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        email.subject.toLowerCase().includes(query) || 
+        email.sender.toLowerCase().includes(query) ||
+        (email.body && email.body.toLowerCase().includes(query));
+      
+      if (!matchesSearch) return false;
+    }
+    
+    // 2. Filter by tabs (currently mock logic since we don't have AI classifications yet)
+    if (activeFilter === 'needs-reply' && !email.subject.toLowerCase().includes('?')) return false;
+    if (activeFilter === 'promotions' && !email.sender.toLowerCase().includes('marketing')) return false;
+    
+    return true;
+  });
+
   return (
     <div className="flex flex-col border border-slate-800/60 rounded-xl overflow-hidden bg-[#0A0F1C]/50">
-      {emails.map(email => (
-        <EmailItem 
-          key={email.id} 
-          {...email} 
-          isSelected={selectedEmails.includes(email.id)}
-          onSelect={(checked) => toggleSelectEmail(email.id, checked)}
-          isActive={selectedEmail?.id === email.id}
-          onClick={() => setSelectedEmail(email)}
-        />
-      ))}
+      {filteredEmails.length === 0 ? (
+        <div className="flex items-center justify-center py-12 text-slate-500 text-sm">
+          No conversations match your search.
+        </div>
+      ) : (
+        filteredEmails.map(email => (
+          <EmailItem 
+            key={email.id} 
+            {...email} 
+            isSelected={selectedEmails.includes(email.id)}
+            onSelect={(checked) => toggleSelectEmail(email.id, checked)}
+            isActive={selectedEmail?.id === email.id}
+            onClick={() => setSelectedEmail(email)}
+          />
+        ))
+      )}
     </div>
   );
 }

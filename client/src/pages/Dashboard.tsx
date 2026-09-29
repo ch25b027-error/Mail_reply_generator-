@@ -13,6 +13,9 @@ export default function Dashboard() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="flex-1 flex flex-col min-w-0 bg-[#060a16]">
+        {/* We can put CommonBar inside the flex column so it spans the top of the middle pane */}
+        <CommonBar />
+        
         <div className="flex-1 flex overflow-hidden">
           <main className="flex-1 overflow-y-auto min-w-0 p-6">
             {activeTab === 'inbox' && <InboxView />}
