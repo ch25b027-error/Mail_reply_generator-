@@ -1,5 +1,7 @@
 import { google } from 'googleapis';
 import User from '../models/User.js';
+import Draft from '../models/Draft.js';
+import ActionHistory from '../models/ActionHistory.js';
 import oauth2Client from '../utils/googleClient.js';
 const decodeBase64 = (data) => data ? Buffer.from(data, 'base64').toString('utf-8') : '';
 export const fetchEmails = async (req, res) => {
@@ -71,7 +73,22 @@ export const sendEmail = async (req, res) => {
       requestBody: { raw: encodedMessage }
     });
     
+    
+    // If draftId is provided, delete it and record action
+    if (req.body.draftId) {
+      await Draft.findByIdAndDelete(req.body.draftId);
+      await ActionHistory.create({
+        userId: req.user.userId,
+        title: `Sent email to ${recipient}`,
+        description: '1 message affected',
+        status: 'Completed',
+        time: 'Just now',
+        previewSubject: subject,
+        previewBody: body
+      });
+    }
     res.json({ success: true, messageId: resData.data.id });
+  
   } catch (error) {
     console.error('Error sending email', error);
     res.status(500).json({ error: 'Failed to send' });
