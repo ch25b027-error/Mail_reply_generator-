@@ -24,9 +24,9 @@ interface EmailContextType {
   isAnalyzingInbox: boolean;
   setIsAnalyzingInbox: (val: boolean) => void;
   showIntelligenceDashboard: boolean;
+  setShowIntelligenceDashboard: (val: boolean) => void;
   globalSearchQuery: string;
   setGlobalSearchQuery: (val: string) => void;
-  setShowIntelligenceDashboard: (val: boolean) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -39,8 +39,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
-  const [showIntelligenceDashboard, setShowIntelligenceDashboard,
-      globalSearchQuery, setGlobalSearchQuery] = useState(false);
+  const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
 
   useEffect(() => {
@@ -70,7 +69,8 @@ export function EmailProvider({ children }: { children: ReactNode }) {
       emails, selectedEmail, setSelectedEmail, 
       aiActionQueue, setAiActionQueue, isLoadingEmails,
       isAnalyzingInbox, setIsAnalyzingInbox,
-      showIntelligenceDashboard, setShowIntelligenceDashboard
+      showIntelligenceDashboard, setShowIntelligenceDashboard,
+      globalSearchQuery, setGlobalSearchQuery
     }}>
       {children}
     </EmailContext.Provider>
