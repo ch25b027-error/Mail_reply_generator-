@@ -28,25 +28,21 @@ export default function QuickPrompts() {
           
           let target = selectedEmail;
           
-          // 1. Attempt to find the target email if the command implies searching
-          if (lowerText.includes('find') || lowerText.includes('from')) {
-            // Very basic extraction: grab the word after 'from'
-            const match = lowerText.match(/from\s+([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) {
-              const keyword = match[1];
-              const foundEmail = emails.find(e => 
-                e.sender.toLowerCase().includes(keyword) || 
-                e.subject.toLowerCase().includes(keyword)
-              );
-              if (foundEmail) {
-                target = foundEmail;
-                setSelectedEmail(foundEmail); // Update UI to select this email
-              }
-            }
-          }
-
-          // Fallback if no specific target was found in the text
-          if (!target && emails.length > 0) {
+          // Attempt to find the target email by matching any sender in the prompt
+          const stopWords = ['the', 'and', 'for', 'you', 'team', 'mail', 'info', 'support', 'noreply', 'no-reply', 'com', 'org', 'net'];
+          
+          const foundEmail = emails.find(e => {
+            const senderTokens = e.sender.toLowerCase().split(/[\s,<>.@]+/)
+              .filter(w => w.length > 2 && !stopWords.includes(w));
+            
+            // If the prompt mentions any significant word from the sender's name
+            return senderTokens.some(word => lowerText.includes(word));
+          });
+          
+          if (foundEmail) {
+            target = foundEmail;
+            setSelectedEmail(foundEmail);
+          } else if (!target && emails.length > 0) {
             target = emails[0];
             setSelectedEmail(target);
           }
