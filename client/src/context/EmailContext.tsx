@@ -38,6 +38,10 @@ interface EmailContextType {
   setGlobalSearchQuery: (val: string) => void;
   selectedCategory: string;
   setSelectedCategory: (val: string) => void;
+  isAiProcessing: boolean;
+  setIsAiProcessing: (val: boolean) => void;
+  isAssistantOpen: boolean;
+  setIsAssistantOpen: (val: boolean) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -55,7 +59,11 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
   const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory,
+      isAiProcessing, setIsAiProcessing,
+      isAssistantOpen, setIsAssistantOpen] = useState("all");
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
 
   useEffect(() => {
     if (isAuthenticated) {

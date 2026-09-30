@@ -5,8 +5,8 @@ import Replygenerator from './Replygenerator';
 import { useEmail } from '../../context/EmailContext';
 
 export default function AssistantPanel() {
-  const { selectedEmail, isAnalyzingSummary, aiSummary } = useEmail();
-  const [isOpen, setIsOpen] = useState(true);
+  const { selectedEmail, isAnalyzingSummary, aiSummary, isAssistantOpen: isOpen, setIsAssistantOpen: setIsOpen } = useEmail();
+  
 
   if (!isOpen || !selectedEmail) {
     if (!isOpen && selectedEmail) {

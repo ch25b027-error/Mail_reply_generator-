@@ -8,7 +8,7 @@ import AssistantPanel from '../components/assistant/AssistantPanel';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('inbox');
-  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
+  const { isAssistantOpen, setIsAssistantOpen } = useEmail();
 
   return (
     <div className="flex h-screen w-full bg-[#030712] text-slate-200 overflow-hidden font-sans">
