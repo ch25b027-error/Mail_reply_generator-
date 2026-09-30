@@ -5,6 +5,7 @@ import DraftsView from '../components/drafts/DraftsView';
 import SentView from '../components/sent/SentView';
 import ActionHistoryView from '../components/history/ActionHistoryView';
 import AssistantPanel from '../components/assistant/AssistantPanel';
+import { useEmail } from '../context/EmailContext';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('inbox');
