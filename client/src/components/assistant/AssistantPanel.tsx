@@ -6,6 +6,22 @@ import { useEmail } from '../../context/EmailContext';
 
 export default function AssistantPanel() {
   const { selectedEmail, isAnalyzingSummary, aiSummary, isAssistantOpen: isOpen, setIsAssistantOpen: setIsOpen, rightPanelWidth } = useEmail();
+  const [isSending, setIsSending] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleSend = async () => {
+    setIsSending(true);
+    try {
+      // Mock API call or real if you have it
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setSuccessMessage('Mail drafted/sent successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSending(false);
+    }
+  };
   
 
   if (!isOpen || !selectedEmail) {
@@ -80,15 +96,31 @@ export default function AssistantPanel() {
 
       {!aiSummary && (
         <div className="p-4 border-t border-slate-800/50 space-y-3 bg-[#0c1222] flex-shrink-0">
-          <button className="w-full py-2.5 rounded-lg border border-slate-700 bg-[#131A2B] text-[13px] font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
-            Confirm & Send Email
+          <button 
+            disabled={isSending}
+            onClick={handleSend}
+            className="w-full flex justify-center items-center gap-2 py-2.5 rounded-lg border border-slate-700 bg-[#131A2B] text-[13px] font-semibold text-slate-300 hover:bg-slate-800 transition-colors disabled:opacity-50"
+          >
+            {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {isSending ? 'Sending...' : 'Confirm & Send Email'}
           </button>
-          <button className="w-full py-2.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-[13px] font-semibold text-white transition-colors flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            Approve & Send
+          <button 
+            disabled={isSending}
+            onClick={handleSend}
+            className="w-full py-2.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-[13px] font-semibold text-white transition-colors flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.3)] disabled:opacity-50"
+          >
+            {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            )}
+            {isSending ? 'Sending...' : 'Approve & Send'}
           </button>
+          {successMessage && (
+            <div className="text-sm font-medium text-emerald-400 mt-2 text-center animate-in fade-in zoom-in-95">
+              {successMessage}
+            </div>
+          )}
         </div>
       )}
     </div>
