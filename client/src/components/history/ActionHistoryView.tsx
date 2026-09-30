@@ -1,20 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, HelpCircle, Bell, PanelRight, Sparkles, CheckCircle, Clock } from 'lucide-react';
 import axios from 'axios';
-import { Search, HelpCircle, Bell, PanelRight, CheckCircle, Clock, Sparkles } from 'lucide-react';
 
-export default function ActionHistoryView({ navigateToDrafts }: { navigateToDrafts: () => void }) {
+interface ActionHistoryViewProps {
+  navigateToDrafts: () => void;
+}
+
+export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryViewProps) {
   const [actions, setActions] = useState<any[]>([]);
   const [selectedAction, setSelectedAction] = useState<any | null>(null);
-  const [timeFilter, setTimeFilter] = useState('All actions');
+  const [selectedFilter, setSelectedFilter] = useState('All actions');
   const [searchQuery, setSearchQuery] = useState('');
   const [metrics, setMetrics] = useState({ actionsThisWeek: 0, messagesAffected: 0, timeSaved: '0 hrs', successRate: '0%' });
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/ai/history', { withCredentials: true });
-        setActions(res.data.actions || []);
-        setMetrics(res.data.metrics || { actionsThisWeek: 38, messagesAffected: 216, timeSaved: '3.4 hrs', successRate: '98.7%' });
+        const fetchedActions = res.data.actions || [];
+        setActions(fetchedActions);
+        
+        // Use backend metrics if available, or calculate our own if they want real derived stats.
+        // The prompt says "Actions this week: metrics.actionsThisWeek (or length of actions in the last 7 days)"
+        // We will just bind to metrics exactly as requested.
+        setMetrics(res.data.metrics || { 
+          actionsThisWeek: fetchedActions.length, 
+          messagesAffected: 216, 
+          timeSaved: '3.4 hrs', 
+          successRate: '98.7%' 
+        });
       } catch (err) {
         console.error("Failed to fetch history", err);
       }
@@ -22,19 +37,42 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
     fetchHistory();
   }, []);
 
-  const filteredActions = actions.filter(a => {
-    if (timeFilter !== 'All actions') {
-      if (timeFilter === 'Completed' && a.status !== 'Completed') return false;
-      if (timeFilter === 'Awaiting approval' && a.status !== 'Awaiting approval') return false;
-    }
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      if (!a.title?.toLowerCase().includes(q) && !a.description?.toLowerCase().includes(q)) {
-        return false;
+  // CMD+K Shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const displayedActions = actions.filter((action) => {
+    let matchesFilter = true;
+    if (selectedFilter === 'Completed') {
+      matchesFilter = action.status === 'Completed';
+    } else if (selectedFilter === 'Awaiting approval') {
+      matchesFilter = action.status === 'Awaiting approval';
+    } else if (selectedFilter === 'Last 7 days') {
+      if (action.createdAt) {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        matchesFilter = new Date(action.createdAt) >= sevenDaysAgo;
+      } else {
+        matchesFilter = true; // Fallback if no date
       }
     }
-    return true;
+
+    const matchesSearch =
+      (action.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (action.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+      
+    return matchesFilter && matchesSearch;
   });
+
+  const filterTabs = ['All actions', 'Completed', 'Awaiting approval', 'Last 7 days'];
 
   return (
     <div className="flex h-full w-full relative">
@@ -72,11 +110,15 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
 
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            {['All actions', 'Completed', 'Awaiting approval', 'Last 7 days'].map(f => (
+            {filterTabs.map(f => (
               <button
                 key={f}
-                onClick={() => setTimeFilter(f)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${timeFilter === f ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300' : 'border-slate-800 bg-[#0B1120] text-slate-400 hover:bg-slate-800/50'}`}
+                onClick={() => setSelectedFilter(f)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                  selectedFilter === f 
+                  ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-400' 
+                  : 'border-slate-800 bg-[#0B1120] text-slate-400 hover:bg-slate-800/50'
+                }`}
               >
                 {f}
               </button>
@@ -85,6 +127,7 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
           <div className="relative">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input 
+              ref={searchInputRef}
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -97,11 +140,15 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
 
         <div className="flex-1 overflow-y-auto scrollbar-hide pb-6">
           <div className="flex flex-col gap-2">
-            {filteredActions.map(action => (
+            {displayedActions.map(action => (
               <div 
                 key={action.id} 
                 onClick={() => setSelectedAction(action)}
-                className={`flex items-center justify-between p-4 rounded-xl cursor-pointer border transition-colors ${selectedAction?.id === action.id ? 'bg-indigo-600/10 border-indigo-500/40' : 'bg-[#0B1120] border-slate-800 hover:border-slate-700'}`}
+                className={`flex items-center justify-between p-4 rounded-xl cursor-pointer border transition-colors ${
+                  selectedAction?.id === action.id 
+                  ? 'bg-indigo-600/10 border-indigo-500/40' 
+                  : 'bg-[#0B1120] border-slate-800 hover:border-slate-700'
+                }`}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded bg-teal-500/20 text-teal-400 flex items-center justify-center">
@@ -109,11 +156,13 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
                   </div>
                   <div>
                     <div className="font-semibold text-slate-200 text-sm">{action.title}</div>
-                    <div className="text-xs text-slate-500">{action.description} • Gemini 3.8</div>
+                    <div className="text-xs text-slate-500">{action.description} • Groq Llama 3</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-full ${action.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                  <div className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-full ${
+                    action.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-indigo-500/10 text-indigo-400'
+                  }`}>
                     {action.status === 'Completed' ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                     {action.status}
                   </div>
@@ -121,7 +170,7 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
                 </div>
               </div>
             ))}
-            {filteredActions.length === 0 && (
+            {displayedActions.length === 0 && (
               <div className="py-12 text-center text-slate-500">No actions found.</div>
             )}
           </div>
@@ -135,10 +184,10 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
             <h2 className="text-xl font-bold text-slate-100 mb-1">{selectedAction.title}</h2>
             <div className="text-xs text-slate-500 mb-6">{selectedAction.time} • {selectedAction.messagesAffected || 1} message affected</div>
 
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Gemini Response</div>
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">AI Draft Response</div>
             <div className="bg-[#131A2B] border border-indigo-500/30 rounded-xl p-4 mb-4">
               <h3 className="text-sm font-semibold text-slate-200 mb-2">{selectedAction.previewSubject || 'Re: Draft'}</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">{selectedAction.previewBody || selectedAction.description}</p>
+              <p className="text-sm text-slate-400 leading-relaxed whitespace-pre-wrap">{selectedAction.previewBody || selectedAction.description}</p>
             </div>
             
             {selectedAction.status === 'Awaiting approval' && (
@@ -146,7 +195,7 @@ export default function ActionHistoryView({ navigateToDrafts }: { navigateToDraf
                 <p className="text-xs text-slate-500 mb-4">Used thread context and your concise, professional tone preference. No message was sent; approval is still required.</p>
                 <button 
                   onClick={navigateToDrafts}
-                  className="w-full py-2.5 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+                  className="w-full py-2.5 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow-[0_0_15px_rgba(99,102,241,0.3)]"
                 >
                   Review draft
                 </button>

@@ -205,6 +205,7 @@ export const getHistory = async (req, res) => {
       description: a.description,
       status: a.status,
       time: a.time || new Date(a.createdAt).toLocaleDateString(),
+      createdAt: a.createdAt,
       previewSubject: a.previewSubject,
       previewBody: a.previewBody,
       messagesAffected: a.messagesAffected
