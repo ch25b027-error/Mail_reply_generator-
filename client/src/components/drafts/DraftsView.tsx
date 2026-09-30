@@ -22,6 +22,7 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
   const [isToneDropdownOpen, setIsToneDropdownOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   const { rightPanelWidth, setRightPanelWidth } = useEmail();
@@ -143,9 +144,12 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
         body: selectedDraft.body
       }, { withCredentials: true });
       
-      setDrafts(drafts.filter(d => d.id !== selectedDraft.id));
-      setSelectedDraft(null);
-      alert("Email dispatched successfully!");
+      setSuccessMessage('Mail drafted/sent successfully');
+      setTimeout(() => {
+        setSuccessMessage(null);
+        setDrafts(drafts.filter(d => d.id !== selectedDraft.id));
+        setSelectedDraft(null);
+      }, 3000);
     } catch (err) {
       console.error("Failed to send", err);
     } finally {
@@ -244,7 +248,10 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
              <div className="py-12 text-center text-slate-500">No drafts found.</div>
           ) : (
             <div className="flex flex-col border border-slate-800/60 rounded-xl overflow-hidden bg-[#0A0F1C]/50">
-              {filteredDrafts.map(draft => (
+              {filteredDrafts.map(draft => {
+                const draftDate = new Date(draft.createdAt || Date.now());
+                const formattedTime = draft.status === 'Scheduled' ? draft.time : draftDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return (
                 <div 
                   key={draft.id} 
                   onClick={() => { setSelectedDraft(draft); setIsRightPanelOpen(true); }}
@@ -265,9 +272,10 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
                     <div className="text-sm font-medium text-slate-300 truncate mb-1">{draft.subject}</div>
                     <div className="text-xs text-slate-500 truncate">{draft.body}</div>
                   </div>
-                  <div className="text-xs text-slate-500 whitespace-nowrap shrink-0">{draft.time}</div>
+                  <div className="text-xs text-slate-500 whitespace-nowrap shrink-0">{formattedTime}</div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           )}
         </div>
@@ -385,13 +393,25 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
               Schedule
             </button>
             <button 
-              className="flex-1 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center justify-center"
+              className="flex-1 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               onClick={handleSend}
               disabled={isSending}
             >
-              {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Approve & Send"}
+              {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              )}
+              {isSending ? "Sending..." : "Approve & Send"}
             </button>
           </div>
+          {successMessage && (
+            <div className="bg-[#0B1120] px-4 pb-4">
+              <div className="text-sm font-medium text-emerald-400 text-center animate-in fade-in zoom-in-95">
+                {successMessage}
+              </div>
+            </div>
+          )}
         </div>
         </>
       )}

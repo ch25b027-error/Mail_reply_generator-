@@ -26,14 +26,27 @@ export default function QuickPrompts() {
           setIsAnalyzingSummary(true); // Spin loader in right panel
           setIsAssistantOpen(true);
           
-          let target = selectedEmail || emails[0];
+          let target = selectedEmail;
           
-          // Heuristic: If prompt explicitly mentions "devpost", find Devpost email
-          if (lowerText.includes('devpost')) {
-            target = emails.find(e => e.sender.toLowerCase().includes('devpost') || e.subject.toLowerCase().includes('devpost')) || target;
+          // Attempt to find the target email by matching any sender in the prompt
+          const stopWords = ['the', 'and', 'for', 'you', 'team', 'mail', 'info', 'support', 'noreply', 'no-reply', 'com', 'org', 'net'];
+          
+          const foundEmail = emails.find(e => {
+            const senderTokens = e.sender.toLowerCase().split(/[\s,<>.@]+/)
+              .filter(w => w.length > 2 && !stopWords.includes(w));
+            
+            // If the prompt mentions any significant word from the sender's name
+            return senderTokens.some(word => lowerText.includes(word));
+          });
+          
+          if (foundEmail) {
+            target = foundEmail;
+            setSelectedEmail(foundEmail);
+          } else if (!target && emails.length > 0) {
+            target = emails[0];
+            setSelectedEmail(target);
           }
           
-          setSelectedEmail(target);
           setAiSummary(''); // Clear summary to show draft view
           
           const res = await axios.post('http://localhost:5000/api/ai/reply', {
