@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Avatar, AvatarFallback } from '../ui/avatar';
-import { Clock, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Clock, MoreHorizontal, Trash2, MailOpen } from 'lucide-react';
 import { useEmail } from '../../context/EmailContext';
 
 interface EmailItemProps {
@@ -50,9 +50,15 @@ export default function EmailItem({ id, initials, sender, subject, preview, time
     }
   };
 
+  const isRead = emailObj?.isRead || false;
+
   return (
     <div 
-      className={`flex items-start gap-4 p-4 border-b border-slate-800/50 hover:bg-[#121A2F] transition-colors cursor-pointer relative ${isActive ? 'bg-[#121A2F] border-l-2 border-l-indigo-500' : 'border-l-2 border-l-transparent'}`}
+      className={`flex items-start gap-4 p-4 border-b border-slate-800/50 transition-colors cursor-pointer relative border-l-2 ${
+        isRead 
+          ? 'bg-[#080c17] hover:bg-[#0c1222] opacity-80 border-l-transparent text-slate-400' 
+          : \`bg-[#131b2e] hover:bg-[#1a233a] text-slate-200 \${isActive ? 'border-l-indigo-400' : 'border-l-indigo-500'}\`
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setMenuOpen(false); }}
       onClick={onClick}
@@ -65,14 +71,17 @@ export default function EmailItem({ id, initials, sender, subject, preview, time
           className="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" 
         />
       </div>
-      <Avatar className="h-9 w-9 bg-slate-800 flex-shrink-0 mt-0.5">
-        <AvatarFallback className="bg-slate-800 text-slate-300 text-xs font-semibold">{initials}</AvatarFallback>
+      <Avatar className={`h-9 w-9 flex-shrink-0 mt-0.5 ${isRead ? 'bg-[#131A2B]' : 'bg-slate-800'}`}>
+        <AvatarFallback className={`${isRead ? 'text-slate-500 bg-[#131A2B]' : 'bg-slate-800 text-slate-300'} text-xs font-semibold transition-colors`}>{initials}</AvatarFallback>
       </Avatar>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm text-slate-200">{sender}</span>
+            <span className={`text-sm ${isRead ? 'font-normal text-slate-400' : 'font-semibold text-slate-200'}`}>{sender}</span>
+            {isRead && (
+              <MailOpen className="w-3.5 h-3.5 text-slate-500 ml-1" title="Read" />
+            )}
             {tag && (
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${tagColor}`}>
                 {tag}
@@ -80,7 +89,7 @@ export default function EmailItem({ id, initials, sender, subject, preview, time
             )}
           </div>
           
-          {!isHovered && <span className="text-xs text-slate-500 font-medium">{time}</span>}
+          {!isHovered && <span className={`text-xs ${isRead ? 'text-slate-600 font-normal' : 'text-slate-500 font-medium'}`}>{time}</span>}
           
           {isHovered && (
             <div className="flex items-center gap-2 text-slate-400">
@@ -106,8 +115,8 @@ export default function EmailItem({ id, initials, sender, subject, preview, time
           )}
         </div>
         <div className="text-sm">
-          <span className="text-slate-200 font-medium mr-2">{subject}</span>
-          <span className="text-slate-400 truncate">- {preview}</span>
+          <span className={`${isRead ? 'font-normal text-slate-400' : 'font-semibold text-slate-200'} mr-2 transition-colors`}>{subject}</span>
+          <span className="text-slate-500 truncate">- {preview}</span>
         </div>
       </div>
     </div>
