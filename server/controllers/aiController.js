@@ -211,8 +211,23 @@ export const getHistory = async (req, res) => {
       messagesAffected: a.messagesAffected
     }));
     
+    const totalActions = formattedActions.length;
+    const completedActions = formattedActions.filter(a => a.status === 'Completed').length;
+    const totalMessagesAffected = formattedActions.reduce((acc, curr) => acc + (curr.messagesAffected || 1), 0);
+    const estimatedHours = ((totalActions * 3) / 60).toFixed(1);
+    const successPercentage = totalActions > 0 ? ((completedActions / totalActions) * 100).toFixed(1) : '100.0';
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const actionsThisWeek = formattedActions.filter(a => new Date(a.createdAt) >= sevenDaysAgo).length;
+
     res.json({
-      metrics: { actionsThisWeek: formattedActions.length + 30, messagesAffected: 216, timeSaved: '3.4 hrs', successRate: '98.7%' },
+      metrics: {
+        actionsThisWeek,
+        messagesAffected: totalMessagesAffected,
+        timeSaved: `${estimatedHours} hrs`,
+        successRate: `${successPercentage}%`
+      },
       actions: formattedActions
     });
   } catch (error) {

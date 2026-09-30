@@ -1,4 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, 
+  // Compute metrics dynamically from the local actions array
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  
+  const actionsThisWeek = actions.filter(a => new Date(a.createdAt || Date.now()) >= sevenDaysAgo).length;
+  const completedActions = actions.filter(a => a.status === 'Completed').length;
+  const totalActions = actions.length;
+  const messagesAffected = actions.reduce((acc, curr) => acc + (curr.messagesAffected || 1), 0);
+  const timeSaved = ((totalActions * 3) / 60).toFixed(1) + ' hrs';
+  const successRate = totalActions > 0 ? ((completedActions / totalActions) * 100).toFixed(1) + '%' : '100.0%';
+
+  const metrics = {
+    actionsThisWeek,
+    messagesAffected,
+    timeSaved,
+    successRate
+  };
+
+  useEffect, useRef } from 'react';
 import { Search, HelpCircle, Bell, PanelRight, Sparkles, CheckCircle, Clock } from 'lucide-react';
 import axios from 'axios';
 
@@ -11,7 +30,7 @@ export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryVie
   const [selectedAction, setSelectedAction] = useState<any | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('All actions');
   const [searchQuery, setSearchQuery] = useState('');
-  const [metrics, setMetrics] = useState({ actionsThisWeek: 0, messagesAffected: 0, timeSaved: '0 hrs', successRate: '0%' });
+  
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -24,12 +43,7 @@ export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryVie
         // Use backend metrics if available, or calculate our own if they want real derived stats.
         // The prompt says "Actions this week: metrics.actionsThisWeek (or length of actions in the last 7 days)"
         // We will just bind to metrics exactly as requested.
-        setMetrics(res.data.metrics || { 
-          actionsThisWeek: fetchedActions.length, 
-          messagesAffected: 216, 
-          timeSaved: '3.4 hrs', 
-          successRate: '98.7%' 
-        });
+        
       } catch (err) {
         console.error("Failed to fetch history", err);
       }
