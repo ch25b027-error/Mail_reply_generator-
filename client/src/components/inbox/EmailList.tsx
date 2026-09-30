@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import EmailItem from './EmailItem';
 import { useEmail } from '../../context/EmailContext';
 import { Loader2 } from 'lucide-react';
@@ -9,14 +9,13 @@ interface EmailListProps {
 }
 
 export default function EmailList({ activeFilter, searchQuery }: EmailListProps) {
-  const { emails, selectedEmail, setSelectedEmail, isLoadingEmails } = useEmail();
-  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
+  const { emails, selectedEmail, setSelectedEmail, isLoadingEmails, selectedEmailIds, setSelectedEmailIds, selectedCategory, setIsAssistantOpen } = useEmail();
 
   const toggleSelectEmail = (id: string, checked: boolean) => {
     if (checked) {
-      setSelectedEmails([...selectedEmails, id]);
+      setSelectedEmailIds([...selectedEmailIds, id]);
     } else {
-      setSelectedEmails(selectedEmails.filter(eId => eId !== id));
+      setSelectedEmailIds(selectedEmailIds.filter(eId => eId !== id));
     }
   };
 
@@ -29,21 +28,25 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
   }
 
   const filteredEmails = emails.filter(email => {
-    // 1. Filter by search query
-    if (searchQuery) {
+    
+    if (selectedCategory && selectedCategory !== 'all') {
+      if (selectedCategory === 'priority') {
+        if (email.category !== 'priority' && !email.isPriority) return false;
+      } else {
+        if (email.category !== selectedCategory) return false;
+      }
+    }
+    if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       const matchesSearch = 
         email.subject.toLowerCase().includes(query) || 
         email.sender.toLowerCase().includes(query) ||
+        email.preview.toLowerCase().includes(query) ||
         (email.body && email.body.toLowerCase().includes(query));
-      
       if (!matchesSearch) return false;
     }
-    
-    // 2. Filter by tabs
     if (activeFilter === 'needs-reply' && !email.subject.toLowerCase().includes('?')) return false;
     if (activeFilter === 'promotions' && !email.sender.toLowerCase().includes('marketing')) return false;
-    
     return true;
   });
 
@@ -58,10 +61,11 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
           <EmailItem 
             key={email.id} 
             {...email} 
-            isSelected={selectedEmails.includes(email.id)}
+            emailObj={email}
+            isSelected={selectedEmailIds.includes(email.id)}
             onSelect={(checked) => toggleSelectEmail(email.id, checked)}
             isActive={selectedEmail?.id === email.id}
-            onClick={() => setSelectedEmail(email)}
+            onClick={() => { setSelectedEmail(email); setIsAssistantOpen(true); }}
           />
         ))
       )}

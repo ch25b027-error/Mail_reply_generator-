@@ -11,11 +11,21 @@ export interface Email {
   time: string;
   tag?: string;
   tagColor?: string;
+  category?: string;
+  isPriority?: boolean;
   body?: string;
+  isRead?: boolean;
 }
 
 interface EmailContextType {
   emails: Email[];
+  setEmails: (emails: Email[]) => void;
+  selectedEmailIds: string[];
+  setSelectedEmailIds: (ids: string[]) => void;
+  isAnalyzingSummary: boolean;
+  setIsAnalyzingSummary: (val: boolean) => void;
+  aiSummary: string | null;
+  setAiSummary: (val: string | null) => void;
   selectedEmail: Email | null;
   setSelectedEmail: (email: Email | null) => void;
   aiActionQueue: any[];
@@ -25,6 +35,20 @@ interface EmailContextType {
   setIsAnalyzingInbox: (val: boolean) => void;
   showIntelligenceDashboard: boolean;
   setShowIntelligenceDashboard: (val: boolean) => void;
+  globalSearchQuery: string;
+  setGlobalSearchQuery: (val: string) => void;
+  selectedCategory: string;
+  setSelectedCategory: (val: string) => void;
+  isAiProcessing: boolean;
+  setIsAiProcessing: (val: boolean) => void;
+  isAssistantOpen: boolean;
+  setIsAssistantOpen: (val: boolean) => void;
+  leftSidebarWidth: number;
+  setLeftSidebarWidth: (val: number) => void;
+  rightPanelWidth: number;
+  setRightPanelWidth: (val: number) => void;
+  generatedDraft: string;
+  setGeneratedDraft: (val: string) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -32,12 +56,22 @@ const EmailContext = createContext<EmailContextType | undefined>(undefined);
 export function EmailProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
   const [emails, setEmails] = useState<Email[]>([]);
+  const [selectedEmailIds, setSelectedEmailIds] = useState<string[]>([]);
+  const [isAnalyzingSummary, setIsAnalyzingSummary] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [aiActionQueue, setAiActionQueue] = useState<any[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
   const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
+  const [generatedDraft, setGeneratedDraft] = useState("");
+  const [leftSidebarWidth, setLeftSidebarWidth] = useState(260);
+  const [rightPanelWidth, setRightPanelWidth] = useState(380);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -63,10 +97,22 @@ export function EmailProvider({ children }: { children: ReactNode }) {
 
   return (
     <EmailContext.Provider value={{ 
-      emails, selectedEmail, setSelectedEmail, 
-      aiActionQueue, setAiActionQueue, isLoadingEmails,
+      emails, setEmails,
+      selectedEmailIds, setSelectedEmailIds,
+      isAnalyzingSummary, setIsAnalyzingSummary,
+      aiSummary, setAiSummary,
+      selectedEmail, setSelectedEmail, 
+      aiActionQueue, setAiActionQueue, 
+      isLoadingEmails,
       isAnalyzingInbox, setIsAnalyzingInbox,
-      showIntelligenceDashboard, setShowIntelligenceDashboard
+      showIntelligenceDashboard, setShowIntelligenceDashboard,
+      globalSearchQuery, setGlobalSearchQuery,
+      selectedCategory, setSelectedCategory,
+      isAiProcessing, setIsAiProcessing,
+      isAssistantOpen, setIsAssistantOpen,
+      leftSidebarWidth, setLeftSidebarWidth,
+      rightPanelWidth, setRightPanelWidth,
+      generatedDraft, setGeneratedDraft
     }}>
       {children}
     </EmailContext.Provider>

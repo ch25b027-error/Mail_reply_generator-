@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Sparkles, SlidersHorizontal, HelpCircle, Bell, PanelRight, Loader2, ChevronDown, ArrowUp } from 'lucide-react';
+import { Search, Sparkles, SlidersHorizontal, HelpCircle, Bell, PanelRight, Loader2, ChevronDown, ArrowUp, ArrowLeft } from 'lucide-react';
 import { useEmail } from '../../context/EmailContext';
+import ScheduleModal from './ScheduleModal';
+import { Trash2, X } from 'lucide-react';
 
-export default function DraftsView() {
+interface DraftsViewProps {
+  navigateHome?: () => void;
+}
+
+export default function DraftsView({ navigateHome }: DraftsViewProps) {
   const [drafts, setDrafts] = useState<any[]>([]);
   const [selectedDraft, setSelectedDraft] = useState<any | null>(null);
   const [filter, setFilter] = useState('All');
@@ -16,8 +22,58 @@ export default function DraftsView() {
   const [isToneDropdownOpen, setIsToneDropdownOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const { rightPanelWidth, setRightPanelWidth } = useEmail();
+
+  const handleRightDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = rightPanelWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      let newWidth = startWidth - (moveEvent.clientX - startX);
+      if (newWidth < 300) newWidth = 300;
+      if (newWidth > 550) newWidth = 550;
+      setRightPanelWidth(newWidth);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
   
   const tones = ["Concise & Professional", "Friendly & Approchable", "Formal", "Direct"];
+
+  const handleDiscard = async () => {
+    if (!selectedDraft) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/drafts/${selectedDraft.id}`, { withCredentials: true });
+      setDrafts(drafts.filter(d => d.id !== selectedDraft.id));
+      setSelectedDraft(null);
+      console.log("Draft discarded");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleConfirmSchedule = async (scheduledTime: string) => {
+    if (!selectedDraft) return;
+    try {
+      await axios.patch(`http://localhost:5000/api/drafts/${selectedDraft.id}/schedule`, { scheduledTime }, { withCredentials: true });
+      const updatedDrafts = drafts.map(d => 
+        d.id === selectedDraft.id ? { ...d, status: 'Scheduled', time: `Scheduled - ${scheduledTime}` } : d
+      );
+      setDrafts(updatedDrafts);
+      setSelectedDraft(updatedDrafts.find(d => d.id === selectedDraft.id) || null);
+      setIsScheduleModalOpen(false);
+      console.log("Draft scheduled for dispatch");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const fetchDrafts = async () => {
@@ -35,7 +91,6 @@ export default function DraftsView() {
 
   const handleQuickPrompt = async (prompt: string) => {
     console.log("Triggering bulk AI operation on drafts:", prompt);
-    // In real app, call /api/ai/command
   };
 
   const handleRefine = async () => {
@@ -115,9 +170,18 @@ export default function DraftsView() {
   return (
     <div className="flex h-full w-full relative">
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6">
-        {/* Top Bar */}
         <div className="h-14 flex-shrink-0 flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-slate-100">Drafts</h1>
+          <div className="flex items-center gap-4 mb-1">
+            {navigateHome && (
+              <button
+                onClick={navigateHome}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 rounded-lg transition-all"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
+              </button>
+            )}
+            <h1 className="text-2xl font-bold text-slate-100">Drafts</h1>
+          </div>
           <div className="flex items-center gap-4 text-slate-400">
             <button className="hover:text-slate-200 transition-colors"><HelpCircle className="w-5 h-5" /></button>
             <button className="hover:text-slate-200 transition-colors"><Bell className="w-5 h-5" /></button>
@@ -125,7 +189,6 @@ export default function DraftsView() {
           </div>
         </div>
 
-        {/* Command Bar */}
         <div className="bg-[#0B1120] rounded-xl border border-slate-800 p-4 mb-6 shadow-sm">
           <div className="flex items-center gap-3 bg-slate-900/50 rounded-lg border border-slate-800 p-2 pl-4">
             <Sparkles className="w-5 h-5 text-indigo-400" />
@@ -145,7 +208,6 @@ export default function DraftsView() {
           </div>
         </div>
         
-        {/* Drafts Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="text-xl font-bold text-slate-100">Drafts</h2>
@@ -163,20 +225,18 @@ export default function DraftsView() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex items-center gap-2 mb-4">
           {['All', 'AI Drafted', 'Scheduled'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={\`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors \${filter === f ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300' : 'border-slate-800 text-slate-400 hover:bg-slate-800/50'}\`}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors ${filter === f ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-300' : 'border-slate-800 text-slate-400 hover:bg-slate-800/50'}`}
             >
               {f}
             </button>
           ))}
         </div>
 
-        {/* List */}
         <div className="flex-1 overflow-y-auto scrollbar-hide pb-6">
           {isLoading ? (
              <div className="py-12 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-500" /></div>
@@ -187,8 +247,8 @@ export default function DraftsView() {
               {filteredDrafts.map(draft => (
                 <div 
                   key={draft.id} 
-                  onClick={() => setSelectedDraft(draft)}
-                  className={\`flex items-start gap-4 p-4 cursor-pointer border-b border-slate-800/50 transition-colors \${selectedDraft?.id === draft.id ? 'bg-indigo-600/10 border-l-2 border-l-indigo-500' : 'hover:bg-slate-800/30'}\`}
+                  onClick={() => { setSelectedDraft(draft); setIsRightPanelOpen(true); }}
+                  className={`flex items-start gap-4 p-4 cursor-pointer border-b border-slate-800/50 transition-colors ${selectedDraft?.id === draft.id ? 'bg-indigo-600/10 border-l-2 border-l-indigo-500' : 'hover:bg-slate-800/30'}`}
                 >
                   <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                     {draft.recipient.substring(0,2).toUpperCase()}
@@ -197,7 +257,7 @@ export default function DraftsView() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-slate-200 truncate">To: {draft.recipient}</span>
                       {draft.status && (
-                        <span className={\`text-[10px] px-2 py-0.5 rounded-full \${draft.status === 'AI Drafted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}\`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${draft.status === 'AI Drafted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
                           {draft.status}
                         </span>
                       )}
@@ -213,15 +273,29 @@ export default function DraftsView() {
         </div>
       </div>
 
-      {/* AI Writing Studio Panel */}
-      {selectedDraft && (
-        <div className="w-[380px] flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
+      {isRightPanelOpen && selectedDraft && (
+        <>
+
+      <div 
+        onMouseDown={handleRightDrag}
+        className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-transparent transition-colors z-50 hidden md:block flex-shrink-0"
+      />
+        <div style={{ width: `${rightPanelWidth}px` }} className="flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
           <div className="p-4 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2 text-indigo-400">
               <Sparkles className="w-4 h-4" />
               <span className="font-bold text-slate-200">AI Writing Studio</span>
             </div>
-            <span className="text-xs text-slate-500">Draft ready for review</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">Draft ready for review</span>
+              <button
+                onClick={() => setIsRightPanelOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-all"
+                title="Close Inspector"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="p-4 overflow-y-auto flex-1">
@@ -297,10 +371,16 @@ export default function DraftsView() {
             </div>
           </div>
           
-          <div className="p-4 border-t border-slate-800 flex gap-3 bg-[#0B1120]">
+          <div className="p-4 border-t border-slate-800 flex gap-2 bg-[#0B1120]">
+            <button 
+              className="px-4 py-2 text-xs font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-lg transition-all flex items-center gap-1.5"
+              onClick={handleDiscard}
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Discard
+            </button>
             <button 
               className="flex-1 py-2 rounded-lg text-sm font-semibold border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
-              onClick={() => console.log('Scheduling via /api/drafts/schedule')}
+              onClick={() => setIsScheduleModalOpen(true)}
             >
               Schedule
             </button>
@@ -313,6 +393,7 @@ export default function DraftsView() {
             </button>
           </div>
         </div>
+        </>
       )}
     </div>
   );

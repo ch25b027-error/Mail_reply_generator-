@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateReply, processCommand, getHistory } from '../controllers/aiController.js';
+import { generateReply, processCommand, getHistory, generateSummary } from '../controllers/aiController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -10,3 +10,4 @@ router.post('/command', protect, processCommand);
 router.get('/history', protect, getHistory);
 
 export default router;
+router.post('/summary', protect, generateSummary);
