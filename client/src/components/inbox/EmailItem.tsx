@@ -97,7 +97,7 @@ export default function EmailItem({ id, initials, sender, subject, preview, time
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 top-full mt-1 w-40 bg-slate-800 border border-slate-700 rounded-md shadow-xl overflow-hidden z-10" onClick={e => e.stopPropagation()}>
-                    <button className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-indigo-600/20 hover:text-indigo-300 transition-colors" onClick={(e) => handleAISummary(e, 'short')}>Short Description</button>
+                    <button className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-indigo-600/20 hover:text-indigo-300 transition-colors" onClick={(e) => handleAISummary(e, 'detailed')}>Detailed Description</button>
                     <button className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-indigo-600/20 hover:text-indigo-300 transition-colors" onClick={(e) => handleAISummary(e, 'brief')}>Brief Description</button>
                   </div>
                 )}
