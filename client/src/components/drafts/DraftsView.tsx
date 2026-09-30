@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, Sparkles, SlidersHorizontal, HelpCircle, Bell, PanelRight, Loader2, ChevronDown, ArrowUp, ArrowLeft } from 'lucide-react';
 import { useEmail } from '../../context/EmailContext';
+import ScheduleModal from './ScheduleModal';
+import { Trash2 } from 'lucide-react';
 
 interface DraftsViewProps {
   navigateHome?: () => void;
@@ -20,8 +22,37 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
   const [isToneDropdownOpen, setIsToneDropdownOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   
   const tones = ["Concise & Professional", "Friendly & Approchable", "Formal", "Direct"];
+
+  const handleDiscard = async () => {
+    if (!selectedDraft) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/drafts/${selectedDraft.id}`, { withCredentials: true });
+      setDrafts(drafts.filter(d => d.id !== selectedDraft.id));
+      setSelectedDraft(null);
+      console.log("Draft discarded");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleConfirmSchedule = async (scheduledTime: string) => {
+    if (!selectedDraft) return;
+    try {
+      await axios.patch(`http://localhost:5000/api/drafts/${selectedDraft.id}/schedule`, { scheduledTime }, { withCredentials: true });
+      const updatedDrafts = drafts.map(d => 
+        d.id === selectedDraft.id ? { ...d, status: 'Scheduled', time: `Scheduled - ${scheduledTime}` } : d
+      );
+      setDrafts(updatedDrafts);
+      setSelectedDraft(updatedDrafts.find(d => d.id === selectedDraft.id) || null);
+      setIsScheduleModalOpen(false);
+      console.log("Draft scheduled for dispatch");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const fetchDrafts = async () => {
@@ -304,10 +335,16 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
             </div>
           </div>
           
-          <div className="p-4 border-t border-slate-800 flex gap-3 bg-[#0B1120]">
+          <div className="p-4 border-t border-slate-800 flex gap-2 bg-[#0B1120]">
+            <button 
+              className="px-4 py-2 text-xs font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-lg transition-all flex items-center gap-1.5"
+              onClick={handleDiscard}
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Discard
+            </button>
             <button 
               className="flex-1 py-2 rounded-lg text-sm font-semibold border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
-              onClick={() => console.log('Scheduling via /api/drafts/schedule')}
+              onClick={() => setIsScheduleModalOpen(true)}
             >
               Schedule
             </button>
