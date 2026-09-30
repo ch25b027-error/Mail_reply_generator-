@@ -50,10 +50,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
   const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
-  const [globalSearchQuery, setGlobalSearchQuery,
-      setEmails, selectedEmailIds, setSelectedEmailIds,
-      isAnalyzingSummary, setIsAnalyzingSummary,
-      aiSummary, setAiSummary] = useState("");
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -79,8 +76,13 @@ export function EmailProvider({ children }: { children: ReactNode }) {
 
   return (
     <EmailContext.Provider value={{ 
-      emails, selectedEmail, setSelectedEmail, 
-      aiActionQueue, setAiActionQueue, isLoadingEmails,
+      emails, setEmails,
+      selectedEmailIds, setSelectedEmailIds,
+      isAnalyzingSummary, setIsAnalyzingSummary,
+      aiSummary, setAiSummary,
+      selectedEmail, setSelectedEmail, 
+      aiActionQueue, setAiActionQueue, 
+      isLoadingEmails,
       isAnalyzingInbox, setIsAnalyzingInbox,
       showIntelligenceDashboard, setShowIntelligenceDashboard,
       globalSearchQuery, setGlobalSearchQuery
