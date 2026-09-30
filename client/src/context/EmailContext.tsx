@@ -59,9 +59,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
   const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory,
-      isAiProcessing, setIsAiProcessing,
-      isAssistantOpen, setIsAssistantOpen] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(true);
 
@@ -99,7 +97,9 @@ export function EmailProvider({ children }: { children: ReactNode }) {
       isAnalyzingInbox, setIsAnalyzingInbox,
       showIntelligenceDashboard, setShowIntelligenceDashboard,
       globalSearchQuery, setGlobalSearchQuery,
-      selectedCategory, setSelectedCategory
+      selectedCategory, setSelectedCategory,
+      isAiProcessing, setIsAiProcessing,
+      isAssistantOpen, setIsAssistantOpen
     }}>
       {children}
     </EmailContext.Provider>
