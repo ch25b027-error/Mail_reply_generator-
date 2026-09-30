@@ -41,13 +41,12 @@ export default function InboxView() {
           <span className="text-white font-semibold text-sm">Nexus Mail</span>
         </div>
         <div className="flex items-center gap-4 text-slate-400">
-          <button className="hover:text-slate-200 transition-colors">
-            <HelpCircle className="w-5 h-5" />
-          </button>
-          <button className="hover:text-slate-200 transition-colors">
-            <Bell className="w-5 h-5" />
-          </button>
-          <button className="hover:text-slate-200 transition-colors">
+          <button
+            onClick={() => setIsAssistantOpen((open) => !open)}
+            className="hover:text-slate-200 transition-colors"
+            title={isAssistantOpen ? 'Close AI Assistant' : 'Open AI Assistant'}
+            aria-label={isAssistantOpen ? 'Close AI Assistant' : 'Open AI Assistant'}
+          >
             <PanelRight className="w-5 h-5" />
           </button>
         </div>
