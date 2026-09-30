@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, HelpCircle, Bell, PanelRight, Sparkles, Loader2, CheckCircle, Clock } from 'lucide-react';
+import { Search, HelpCircle, Bell, PanelRight, Sparkles, Loader2, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 
-export default function SentView({ navigateToDrafts }: { navigateToDrafts: () => void }) {
+export default function SentView({ navigateToDrafts, navigateHome }: { navigateToDrafts?: () => void; navigateHome?: () => void }) {
   const [sentEmails, setSentEmails] = useState<any[]>([]);
   const [selectedSentEmail, setSelectedSentEmail] = useState<any | null>(null);
   const [sentFilter, setSentFilter] = useState('All');

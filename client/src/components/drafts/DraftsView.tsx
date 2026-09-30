@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Sparkles, SlidersHorizontal, HelpCircle, Bell, PanelRight, Loader2, ChevronDown, ArrowUp } from 'lucide-react';
+import { Search, Sparkles, SlidersHorizontal, HelpCircle, Bell, PanelRight, Loader2, ChevronDown, ArrowUp, ArrowLeft } from 'lucide-react';
 import { useEmail } from '../../context/EmailContext';
 
-export default function DraftsView() {
+interface DraftsViewProps {
+  navigateHome?: () => void;
+}
+
+export default function DraftsView({ navigateHome }: DraftsViewProps) {
   const [drafts, setDrafts] = useState<any[]>([]);
   const [selectedDraft, setSelectedDraft] = useState<any | null>(null);
   const [filter, setFilter] = useState('All');
@@ -115,7 +119,17 @@ export default function DraftsView() {
     <div className="flex h-full w-full relative">
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6">
         <div className="h-14 flex-shrink-0 flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-slate-100">Drafts</h1>
+          <div className="flex items-center gap-4 mb-1">
+            {navigateHome && (
+              <button
+                onClick={navigateHome}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 rounded-lg transition-all"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
+              </button>
+            )}
+            <h1 className="text-2xl font-bold text-slate-100">Drafts</h1>
+          </div>
           <div className="flex items-center gap-4 text-slate-400">
             <button className="hover:text-slate-200 transition-colors"><HelpCircle className="w-5 h-5" /></button>
             <button className="hover:text-slate-200 transition-colors"><Bell className="w-5 h-5" /></button>

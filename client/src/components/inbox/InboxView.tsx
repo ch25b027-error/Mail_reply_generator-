@@ -5,12 +5,12 @@ import EmailList from './EmailList';
 import Intelligenceview from '../intelligence/Intelligenceview';
 import AnalyzingModal from '../intelligence/AnalyzingModal';
 import { useEmail } from '../../context/EmailContext';
-import { Search, SlidersHorizontal, HelpCircle, Bell, PanelRight } from 'lucide-react';
+import { Search, SlidersHorizontal, HelpCircle, Bell, PanelRight, X } from 'lucide-react';
 
 export default function InboxView() {
   
   const [activeFilter, setActiveFilter] = useState('all');
-  const { isAnalyzingInbox, globalSearchQuery, setGlobalSearchQuery } = useEmail();
+  const { isAnalyzingInbox, globalSearchQuery, setGlobalSearchQuery, setSelectedCategory } = useEmail();
 
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto w-full relative">
@@ -48,6 +48,17 @@ export default function InboxView() {
         </div>
         
         <div className="flex items-center gap-3">
+          {(globalSearchQuery.trim()) && (
+            <button
+              onClick={() => {
+                setGlobalSearchQuery('');
+                setSelectedCategory('all');
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 rounded-lg transition-all animate-in fade-in duration-150"
+            >
+              <X className="w-3.5 h-3.5" /> Clear Search
+            </button>
+          )}
           <div className="relative group">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input 

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, HelpCircle, Bell, PanelRight, Sparkles, CheckCircle, Clock } from 'lucide-react';
+import { Search, HelpCircle, Bell, PanelRight, Sparkles, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
 interface ActionHistoryViewProps {
+  navigateHome?: () => void;
   navigateToDrafts: () => void;
 }
 
-export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryViewProps) {
+export default function ActionHistoryView({ navigateToDrafts, navigateHome }: ActionHistoryViewProps) {
   const [actions, setActions] = useState<any[]>([]);
   const [selectedAction, setSelectedAction] = useState<any | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('All actions');
@@ -86,7 +87,17 @@ export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryVie
       <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-6">
         <div className="h-14 flex-shrink-0 flex items-center justify-between mb-4">
           <div>
+            <div className="flex items-center gap-4 mb-1">
+            {navigateHome && (
+              <button
+                onClick={navigateHome}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 rounded-lg transition-all"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
+              </button>
+            )}
             <h1 className="text-2xl font-bold text-slate-100">AI Action History</h1>
+          </div>
             <span className="text-xs text-slate-500">Review every Gemini action across your inbox.</span>
           </div>
           <div className="flex items-center gap-4 text-slate-400">

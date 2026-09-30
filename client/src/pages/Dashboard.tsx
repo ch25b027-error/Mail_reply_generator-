@@ -18,9 +18,9 @@ export default function Dashboard() {
         <div className="flex-1 flex overflow-hidden">
           <main className="flex-1 overflow-y-auto min-w-0 p-6 flex">
             {activeTab === 'inbox' && <InboxView />}
-            {activeTab === 'drafts' && <DraftsView />}
-            {activeTab === 'sent' && <SentView navigateToDrafts={() => setActiveTab('drafts')} />}
-            {activeTab === 'history' && <ActionHistoryView navigateToDrafts={() => setActiveTab('drafts')} />}
+            {activeTab === 'drafts' && <DraftsView navigateHome={() => setActiveTab('inbox')} />}
+            {activeTab === 'sent' && <SentView navigateToDrafts={() => setActiveTab('drafts')} navigateHome={() => setActiveTab('inbox')} />}
+            {activeTab === 'history' && <ActionHistoryView navigateToDrafts={() => setActiveTab('drafts')} navigateHome={() => setActiveTab('inbox')} />}
             
             {activeTab !== 'inbox' && activeTab !== 'drafts' && activeTab !== 'history' && activeTab !== 'sent' && (
               <div className="text-slate-400 p-4 border border-slate-800 rounded-lg m-auto">
