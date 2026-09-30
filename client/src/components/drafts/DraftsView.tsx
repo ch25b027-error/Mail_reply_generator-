@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Search, Sparkles, SlidersHorizontal, HelpCircle, Bell, PanelRight, Loader2, ChevronDown, ArrowUp, ArrowLeft } from 'lucide-react';
 import { useEmail } from '../../context/EmailContext';
 import ScheduleModal from './ScheduleModal';
-import { Trash2 } from 'lucide-react';
+import { Trash2, X } from 'lucide-react';
 
 interface DraftsViewProps {
   navigateHome?: () => void;
@@ -23,6 +23,27 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const { rightPanelWidth, setRightPanelWidth } = useEmail();
+
+  const handleRightDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = rightPanelWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      let newWidth = startWidth - (moveEvent.clientX - startX);
+      if (newWidth < 300) newWidth = 300;
+      if (newWidth > 550) newWidth = 550;
+      setRightPanelWidth(newWidth);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
   
   const tones = ["Concise & Professional", "Friendly & Approchable", "Formal", "Direct"];
 
@@ -226,7 +247,7 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
               {filteredDrafts.map(draft => (
                 <div 
                   key={draft.id} 
-                  onClick={() => setSelectedDraft(draft)}
+                  onClick={() => { setSelectedDraft(draft); setIsRightPanelOpen(true); }}
                   className={`flex items-start gap-4 p-4 cursor-pointer border-b border-slate-800/50 transition-colors ${selectedDraft?.id === draft.id ? 'bg-indigo-600/10 border-l-2 border-l-indigo-500' : 'hover:bg-slate-800/30'}`}
                 >
                   <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -252,14 +273,29 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
         </div>
       </div>
 
-      {selectedDraft && (
-        <div className="w-[380px] flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
+      {isRightPanelOpen && selectedDraft && (
+        <>
+
+      <div 
+        onMouseDown={handleRightDrag}
+        className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-transparent transition-colors z-50 hidden md:block flex-shrink-0"
+      />
+        <div style={{ width: `${rightPanelWidth}px` }} className="flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
           <div className="p-4 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2 text-indigo-400">
               <Sparkles className="w-4 h-4" />
               <span className="font-bold text-slate-200">AI Writing Studio</span>
             </div>
-            <span className="text-xs text-slate-500">Draft ready for review</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">Draft ready for review</span>
+              <button
+                onClick={() => setIsRightPanelOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-all"
+                title="Close Inspector"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="p-4 overflow-y-auto flex-1">
@@ -357,6 +393,7 @@ export default function DraftsView({ navigateHome }: DraftsViewProps) {
             </button>
           </div>
         </div>
+        </>
       )}
     </div>
   );

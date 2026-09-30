@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, HelpCircle, Bell, PanelRight, Sparkles, Loader2, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
+import { Search, HelpCircle, Bell, PanelRight, Sparkles, Loader2, CheckCircle, Clock, ArrowLeft, X } from 'lucide-react';
+import { useEmail } from '../../context/EmailContext';
 
 export default function SentView({ navigateToDrafts, navigateHome }: { navigateToDrafts?: () => void; navigateHome?: () => void }) {
   const [sentEmails, setSentEmails] = useState<any[]>([]);
@@ -9,6 +10,27 @@ export default function SentView({ navigateToDrafts, navigateHome }: { navigateT
   const [sentSearchQuery, setSentSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isDraftingFollowUp, setIsDraftingFollowUp] = useState(false);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const { rightPanelWidth, setRightPanelWidth } = useEmail();
+
+  const handleRightDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = rightPanelWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      let newWidth = startWidth - (moveEvent.clientX - startX);
+      if (newWidth < 300) newWidth = 300;
+      if (newWidth > 550) newWidth = 550;
+      setRightPanelWidth(newWidth);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
 
   useEffect(() => {
     const fetchSent = async () => {
@@ -140,7 +162,7 @@ export default function SentView({ navigateToDrafts, navigateHome }: { navigateT
               {filteredSent.map(email => (
                 <div 
                   key={email.id} 
-                  onClick={() => setSelectedSentEmail(email)}
+                  onClick={() => { setSelectedSentEmail(email); setIsRightPanelOpen(true); }}
                   className={`flex items-start gap-4 p-4 cursor-pointer border-b border-slate-800/50 transition-colors ${selectedSentEmail?.id === email.id ? 'bg-indigo-600/10 border-l-2 border-l-indigo-500' : 'hover:bg-slate-800/30'}`}
                 >
                   <div className="pt-1">
@@ -173,8 +195,14 @@ export default function SentView({ navigateToDrafts, navigateHome }: { navigateT
         </div>
       </div>
 
-      {selectedSentEmail && (
-        <div className="w-[420px] flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
+      {isRightPanelOpen && selectedSentEmail && (
+        <>
+
+      <div 
+        onMouseDown={handleRightDrag}
+        className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-transparent transition-colors z-50 hidden md:block flex-shrink-0"
+      />
+        <div style={{ width: `${rightPanelWidth}px` }} className="flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col h-full right-0 top-0">
           <div className="p-4 border-b border-slate-800 flex items-center justify-between">
             <div>
               <div className="font-bold text-slate-200">Message details</div>
@@ -238,6 +266,7 @@ export default function SentView({ navigateToDrafts, navigateHome }: { navigateT
             </button>
           </div>
         </div>
+        </>
       )}
     </div>
   );

@@ -43,6 +43,10 @@ interface EmailContextType {
   setIsAiProcessing: (val: boolean) => void;
   isAssistantOpen: boolean;
   setIsAssistantOpen: (val: boolean) => void;
+  leftSidebarWidth: number;
+  setLeftSidebarWidth: (val: number) => void;
+  rightPanelWidth: number;
+  setRightPanelWidth: (val: number) => void;
   generatedDraft: string;
   setGeneratedDraft: (val: string) => void;
 }
@@ -65,7 +69,11 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(true);
-  const [generatedDraft, setGeneratedDraft] = useState("");
+  const [generatedDraft, setGeneratedDraft,
+      leftSidebarWidth, setLeftSidebarWidth,
+      rightPanelWidth, setRightPanelWidth] = useState("");
+  const [leftSidebarWidth, setLeftSidebarWidth] = useState(260);
+  const [rightPanelWidth, setRightPanelWidth] = useState(380);
 
   useEffect(() => {
     if (isAuthenticated) {

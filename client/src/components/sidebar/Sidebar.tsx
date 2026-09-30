@@ -32,7 +32,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       </button>
 
       {/* Sidebar */}
-      <aside className={`w-[280px] flex-shrink-0 flex flex-col h-full bg-[#0B1120] border-r border-slate-800 transition-transform duration-300 z-40 fixed md:relative ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside style={{ width: leftSidebarWidth ? ${leftSidebarWidth}px : undefined }} className={`w-full md:w-auto flex-shrink-0 flex flex-col h-full bg-[#0B1120] border-r border-slate-800 transition-transform duration-300 z-40 fixed md:relative ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <UserProfile />
         
         <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-2">
