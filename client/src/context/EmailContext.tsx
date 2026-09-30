@@ -54,8 +54,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
   const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
-  const [globalSearchQuery, setGlobalSearchQuery,
-      selectedCategory, setSelectedCategory] = useState("");
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
@@ -91,7 +90,8 @@ export function EmailProvider({ children }: { children: ReactNode }) {
       isLoadingEmails,
       isAnalyzingInbox, setIsAnalyzingInbox,
       showIntelligenceDashboard, setShowIntelligenceDashboard,
-      globalSearchQuery, setGlobalSearchQuery
+      globalSearchQuery, setGlobalSearchQuery,
+      selectedCategory, setSelectedCategory
     }}>
       {children}
     </EmailContext.Provider>
