@@ -69,9 +69,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(true);
-  const [generatedDraft, setGeneratedDraft,
-      leftSidebarWidth, setLeftSidebarWidth,
-      rightPanelWidth, setRightPanelWidth] = useState("");
+  const [generatedDraft, setGeneratedDraft] = useState("");
   const [leftSidebarWidth, setLeftSidebarWidth] = useState(260);
   const [rightPanelWidth, setRightPanelWidth] = useState(380);
 
@@ -112,6 +110,8 @@ export function EmailProvider({ children }: { children: ReactNode }) {
       selectedCategory, setSelectedCategory,
       isAiProcessing, setIsAiProcessing,
       isAssistantOpen, setIsAssistantOpen,
+      leftSidebarWidth, setLeftSidebarWidth,
+      rightPanelWidth, setRightPanelWidth,
       generatedDraft, setGeneratedDraft
     }}>
       {children}
