@@ -16,6 +16,13 @@ export interface Email {
 
 interface EmailContextType {
   emails: Email[];
+  setEmails: (emails: Email[]) => void;
+  selectedEmailIds: string[];
+  setSelectedEmailIds: (ids: string[]) => void;
+  isAnalyzingSummary: boolean;
+  setIsAnalyzingSummary: (val: boolean) => void;
+  aiSummary: string | null;
+  setAiSummary: (val: string | null) => void;
   selectedEmail: Email | null;
   setSelectedEmail: (email: Email | null) => void;
   aiActionQueue: any[];
@@ -34,13 +41,19 @@ const EmailContext = createContext<EmailContextType | undefined>(undefined);
 export function EmailProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
   const [emails, setEmails] = useState<Email[]>([]);
+  const [selectedEmailIds, setSelectedEmailIds] = useState<string[]>([]);
+  const [isAnalyzingSummary, setIsAnalyzingSummary] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [aiActionQueue, setAiActionQueue] = useState<any[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
   const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
-  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+  const [globalSearchQuery, setGlobalSearchQuery,
+      setEmails, selectedEmailIds, setSelectedEmailIds,
+      isAnalyzingSummary, setIsAnalyzingSummary,
+      aiSummary, setAiSummary] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {

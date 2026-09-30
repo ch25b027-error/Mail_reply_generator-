@@ -11,7 +11,7 @@ export const fetchEmails = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-    const response = await gmail.users.messages.list({ userId: 'me', labelIds: ['INBOX'], q: 'newer_than:7d', maxResults: 500 });
+    const response = await gmail.users.messages.list({ userId: 'me', labelIds: ['INBOX'], q: 'newer_than:7d', maxResults: 100 });
     const messages = response.data.messages || [];
     if (messages.length === 0) return res.json([]);
     const emails = [];
@@ -118,7 +118,7 @@ export const fetchSentEmails = async (req, res) => {
     oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
     
-    const response = await gmail.users.messages.list({ userId: 'me', labelIds: ['SENT'], q: 'newer_than:7d', maxResults: 500 });
+    const response = await gmail.users.messages.list({ userId: 'me', labelIds: ['SENT'], q: 'newer_than:7d', maxResults: 100 });
     const messages = response.data.messages || [];
     if (messages.length === 0) return res.json([]);
     
@@ -181,3 +181,36 @@ export const fetchSentEmails = async (req, res) => {
   }
 };
 
+
+export const markAsRead = async (req, res) => {
+  try {
+    const { emailIds } = req.body;
+    const user = await User.findById(req.user.userId);
+    oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    await gmail.users.messages.batchModify({ userId: 'me', requestBody: { ids: emailIds, removeLabelIds: ['UNREAD'] } });
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Failed' }); }
+};
+
+export const bulkDelete = async (req, res) => {
+  try {
+    const { emailIds } = req.body;
+    const user = await User.findById(req.user.userId);
+    oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    await gmail.users.messages.batchModify({ userId: 'me', requestBody: { ids: emailIds, addLabelIds: ['TRASH'], removeLabelIds: ['INBOX'] } });
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Failed' }); }
+};
+
+export const deleteEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(req.user.userId);
+    oauth2Client.setCredentials({ access_token: user.accessToken, refresh_token: user.refreshToken });
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    await gmail.users.messages.trash({ userId: 'me', id });
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Failed' }); }
+};

@@ -208,3 +208,12 @@ export const getHistory = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+export const generateSummary = async (req, res) => {
+  try {
+    const { emailContext, summaryType } = req.body;
+    const prompt = `Summarize this email in a ${summaryType} way:\n\nFrom: ${emailContext.sender}\nSubject: ${emailContext.subject}\n\n${emailContext.body || emailContext.preview}`;
+    const messages = [{ role: 'system', content: 'You are an intelligent email summarization assistant.' }, { role: 'user', content: prompt }];
+    const summary = await callGroqWithFallback(messages);
+    res.json({ summary });
+  } catch (error) { res.status(500).json({ error: 'Failed' }); }
+};
