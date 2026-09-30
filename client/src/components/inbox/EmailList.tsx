@@ -9,7 +9,7 @@ interface EmailListProps {
 }
 
 export default function EmailList({ activeFilter, searchQuery }: EmailListProps) {
-  const { emails, selectedEmail, setSelectedEmail, isLoadingEmails, selectedEmailIds, setSelectedEmailIds, selectedCategory } = useEmail();
+  const { emails, selectedEmail, setSelectedEmail, isLoadingEmails, selectedEmailIds, setSelectedEmailIds, selectedCategory, setIsAssistantOpen } = useEmail();
 
   const toggleSelectEmail = (id: string, checked: boolean) => {
     if (checked) {
@@ -65,7 +65,7 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
             isSelected={selectedEmailIds.includes(email.id)}
             onSelect={(checked) => toggleSelectEmail(email.id, checked)}
             isActive={selectedEmail?.id === email.id}
-            onClick={() => { setSelectedEmail(email); }}
+            onClick={() => { setSelectedEmail(email); setIsAssistantOpen(true); }}
           />
         ))
       )}

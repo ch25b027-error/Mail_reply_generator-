@@ -5,15 +5,29 @@ import EmailList from './EmailList';
 import Intelligenceview from '../intelligence/Intelligenceview';
 import AnalyzingModal from '../intelligence/AnalyzingModal';
 import { useEmail } from '../../context/EmailContext';
-import { Search, SlidersHorizontal, HelpCircle, Bell, PanelRight, X } from 'lucide-react';
+import { Search, SlidersHorizontal, HelpCircle, Bell, PanelRight, X, Sparkles, ChevronLeft } from 'lucide-react';
 
 export default function InboxView() {
   
   const [activeFilter, setActiveFilter] = useState('all');
-  const { isAnalyzingInbox, globalSearchQuery, setGlobalSearchQuery, setSelectedCategory } = useEmail();
+  const { isAnalyzingInbox, globalSearchQuery, setGlobalSearchQuery, setSelectedCategory, isAssistantOpen, setIsAssistantOpen } = useEmail();
 
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto w-full relative">
+      {!isAssistantOpen && (
+        <button
+          onClick={() => setIsAssistantOpen(true)}
+          className="fixed right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 py-3 px-1.5 bg-[#0c1222] hover:bg-[#131b2e] border-l border-t border-b border-slate-800/80 rounded-l-xl text-slate-400 hover:text-slate-200 transition-all z-20 shadow-xl group"
+          title="Open AI Assistant"
+        >
+          <ChevronLeft className="w-4 h-4 text-indigo-400 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="[writing-mode:vertical-rl] rotate-180 text-[10px] font-semibold tracking-wider uppercase text-slate-400 group-hover:text-slate-200">
+            AI Assistant
+          </span>
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400 mt-1" />
+        </button>
+      )}
+
       {isAnalyzingInbox && <AnalyzingModal />}
       
       {/* Nexus Mail Top Bar */}
