@@ -134,9 +134,55 @@ Required Tone: ${tone}`;
 
     await ActionHistory.create({
       userId: req.user.userId,
+      title: `Drafted reply to ${emailContext.sender}`,
+      description: '1 message affected',
+      status: 'Awaiting approval',
+      time: 'Just now',
+      previewSubject: emailContext.subject,
+      previewBody: draft
+    });
+
+    res.json({ draft });
+
+  } catch (error) {
+    console.error('Error generating reply:', error);
+    res.status(500).json({ error: error.message || 'Failed to generate reply' });
+  }
+};
+
+export const processCommand = async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json({ error: 'Prompt required' });
+
+    const messages = [
+      {
+        role: 'system',
+        content: 'You are an AI inbox organizer. Analyze the user command and return a JSON object with key "actions" containing a list of strings representing recommended actions.'
+      },
+      {
+        role: 'user',
+        content: prompt
+      }
+    ];
+
+    // Enforce JSON output mode on Groq
+    const rawResponse = await callGroqWithFallback(messages, { type: 'json_object' });
+
+    let jsonResponse;
+    try {
+      jsonResponse = JSON.parse(rawResponse);
+    } catch (e) {
+      jsonResponse = { actions: [rawResponse] };
+    }
+
+    // Save to Mongo
+    await ActionHistory.create({
+      userId: req.user.userId,
       title: `Processed command: ${prompt.substring(0, 20)}...`,
       description: `${jsonResponse.actions ? jsonResponse.actions.length : 1} actions taken`,
       status: 'Completed',
+      time: 'Just now',
       previewSubject: 'Command Execution',
       previewBody: JSON.stringify(jsonResponse.actions)
     });
@@ -153,28 +199,17 @@ export const getHistory = async (req, res) => {
   try {
     let actions = await ActionHistory.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     
-    const formattedActions = actions.map(a => {
-      const actionDate = new Date(a.createdAt || Date.now());
-      const formattedTime = actionDate.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      });
-      const isToday = actionDate.toDateString() === new Date().toDateString();
-      const displayTime = isToday ? formattedTime : actionDate.toLocaleDateString();
-
-      return {
-        id: a._id.toString(),
-        title: a.title,
-        description: a.description,
-        status: a.status,
-        time: displayTime,
-        createdAt: a.createdAt,
-        previewSubject: a.previewSubject,
-        previewBody: a.previewBody,
-        messagesAffected: a.messagesAffected
-      };
-    });
+    const formattedActions = actions.map(a => ({
+      id: a._id.toString(),
+      title: a.title,
+      description: a.description,
+      status: a.status,
+      time: a.time || new Date(a.createdAt).toLocaleDateString(),
+      createdAt: a.createdAt,
+      previewSubject: a.previewSubject,
+      previewBody: a.previewBody,
+      messagesAffected: a.messagesAffected
+    }));
     
     const totalActions = formattedActions.length;
     const completedActions = formattedActions.filter(a => a.status === 'Completed').length;
