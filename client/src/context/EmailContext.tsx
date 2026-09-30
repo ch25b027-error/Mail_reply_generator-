@@ -14,6 +14,7 @@ export interface Email {
   category?: string;
   isPriority?: boolean;
   body?: string;
+  isRead?: boolean;
 }
 
 interface EmailContextType {
@@ -63,8 +64,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAiProcessing, setIsAiProcessing] = useState(false);
-  const [isAssistantOpen, setIsAssistantOpen,
-      generatedDraft, setGeneratedDraft] = useState(true);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
   const [generatedDraft, setGeneratedDraft] = useState("");
 
   useEffect(() => {
@@ -103,7 +103,8 @@ export function EmailProvider({ children }: { children: ReactNode }) {
       globalSearchQuery, setGlobalSearchQuery,
       selectedCategory, setSelectedCategory,
       isAiProcessing, setIsAiProcessing,
-      isAssistantOpen, setIsAssistantOpen
+      isAssistantOpen, setIsAssistantOpen,
+      generatedDraft, setGeneratedDraft
     }}>
       {children}
     </EmailContext.Provider>
