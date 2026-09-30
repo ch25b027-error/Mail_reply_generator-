@@ -1,4 +1,18 @@
-import React, { useState, 
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, HelpCircle, Bell, PanelRight, Sparkles, CheckCircle, Clock } from 'lucide-react';
+import axios from 'axios';
+
+interface ActionHistoryViewProps {
+  navigateToDrafts: () => void;
+}
+
+export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryViewProps) {
+  const [actions, setActions] = useState<any[]>([]);
+  const [selectedAction, setSelectedAction] = useState<any | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState('All actions');
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Compute metrics dynamically from the local actions array
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -17,33 +31,12 @@ import React, { useState,
     successRate
   };
 
-  useEffect, useRef } from 'react';
-import { Search, HelpCircle, Bell, PanelRight, Sparkles, CheckCircle, Clock } from 'lucide-react';
-import axios from 'axios';
-
-interface ActionHistoryViewProps {
-  navigateToDrafts: () => void;
-}
-
-export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryViewProps) {
-  const [actions, setActions] = useState<any[]>([]);
-  const [selectedAction, setSelectedAction] = useState<any | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState('All actions');
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/ai/history', { withCredentials: true });
         const fetchedActions = res.data.actions || [];
         setActions(fetchedActions);
-        
-        // Use backend metrics if available, or calculate our own if they want real derived stats.
-        // The prompt says "Actions this week: metrics.actionsThisWeek (or length of actions in the last 7 days)"
-        // We will just bind to metrics exactly as requested.
-        
       } catch (err) {
         console.error("Failed to fetch history", err);
       }
@@ -71,9 +64,9 @@ export default function ActionHistoryView({ navigateToDrafts }: ActionHistoryVie
       matchesFilter = action.status === 'Awaiting approval';
     } else if (selectedFilter === 'Last 7 days') {
       if (action.createdAt) {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        matchesFilter = new Date(action.createdAt) >= sevenDaysAgo;
+        const sevenDays = new Date();
+        sevenDays.setDate(sevenDays.getDate() - 7);
+        matchesFilter = new Date(action.createdAt) >= sevenDays;
       } else {
         matchesFilter = true; // Fallback if no date
       }
