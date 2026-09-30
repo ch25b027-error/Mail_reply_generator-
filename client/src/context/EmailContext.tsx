@@ -11,6 +11,8 @@ export interface Email {
   time: string;
   tag?: string;
   tagColor?: string;
+  category?: string;
+  isPriority?: boolean;
   body?: string;
 }
 
@@ -34,6 +36,8 @@ interface EmailContextType {
   setShowIntelligenceDashboard: (val: boolean) => void;
   globalSearchQuery: string;
   setGlobalSearchQuery: (val: string) => void;
+  selectedCategory: string;
+  setSelectedCategory: (val: string) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -50,7 +54,9 @@ export function EmailProvider({ children }: { children: ReactNode }) {
   
   const [isAnalyzingInbox, setIsAnalyzingInbox] = useState(false);
   const [showIntelligenceDashboard, setShowIntelligenceDashboard] = useState(false);
-  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+  const [globalSearchQuery, setGlobalSearchQuery,
+      selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
     if (isAuthenticated) {

@@ -9,7 +9,7 @@ interface EmailListProps {
 }
 
 export default function EmailList({ activeFilter, searchQuery }: EmailListProps) {
-  const { emails, selectedEmail, setSelectedEmail, isLoadingEmails, selectedEmailIds, setSelectedEmailIds } = useEmail();
+  const { emails, selectedEmail, setSelectedEmail, isLoadingEmails, selectedEmailIds, setSelectedEmailIds, selectedCategory } = useEmail();
 
   const toggleSelectEmail = (id: string, checked: boolean) => {
     if (checked) {
@@ -28,6 +28,14 @@ export default function EmailList({ activeFilter, searchQuery }: EmailListProps)
   }
 
   const filteredEmails = emails.filter(email => {
+    
+    if (selectedCategory && selectedCategory !== 'all') {
+      if (selectedCategory === 'priority') {
+        if (email.category !== 'priority' && !email.isPriority) return false;
+      } else {
+        if (email.category !== selectedCategory) return false;
+      }
+    }
     if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       const matchesSearch = 

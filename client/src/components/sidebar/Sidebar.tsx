@@ -3,6 +3,7 @@ import { Inbox, History, Send, FileEdit, Settings, Menu } from 'lucide-react';
 import UserProfile from './UserProfile';
 import FolderList from './FolderList';
 import EngineStatus from './EngineStatus';
+import { useEmail } from '../../context/EmailContext';
 
 interface SidebarProps {
   activeTab: string;
@@ -11,9 +12,10 @@ interface SidebarProps {
 
 export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { emails, setSelectedCategory } = useEmail();
 
   const navItems = [
-    { id: 'inbox', label: 'Inbox', icon: Inbox, badge: '24' },
+    { id: 'inbox', label: 'Inbox', icon: Inbox, badge: emails.length > 0 ? emails.length.toString() : '' },
     { id: 'history', label: 'AI Action History', icon: History },
     { id: 'sent', label: 'Sent', icon: Send },
     { id: 'drafts', label: 'Drafts', icon: FileEdit, badge: '3' },
@@ -40,7 +42,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
               return (
                 <button
                   key={item.id}
-                  onClick={() => { setActiveTab(item.id); setIsMobileOpen(false); }}
+                  onClick={() => { setActiveTab(item.id); setIsMobileOpen(false); if (item.id === 'inbox') setSelectedCategory('all'); }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20'
