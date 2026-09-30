@@ -57,7 +57,7 @@ export default function EmailItem({ id, initials, sender, subject, preview, time
       className={`flex items-start gap-4 p-4 border-b border-slate-800/50 transition-colors cursor-pointer relative border-l-2 ${
         isRead 
           ? 'bg-[#080c17] hover:bg-[#0c1222] opacity-80 border-l-transparent text-slate-400' 
-          : \`bg-[#131b2e] hover:bg-[#1a233a] text-slate-200 \${isActive ? 'border-l-indigo-400' : 'border-l-indigo-500'}\`
+          : 'bg-[#131b2e] hover:bg-[#1a233a] text-slate-200 ' + (isActive ? 'border-l-indigo-400' : 'border-l-indigo-500')
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setMenuOpen(false); }}
