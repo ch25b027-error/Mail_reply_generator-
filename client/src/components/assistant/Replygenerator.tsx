@@ -4,8 +4,7 @@ import axios from 'axios';
 import { useEmail } from '../../context/EmailContext';
 
 export default function Replygenerator() {
-  const { selectedEmail } = useEmail();
-  const [draftContent, setDraftContent] = useState('');
+  const { selectedEmail, generatedDraft, setGeneratedDraft } = useEmail();
   const [selectedTone, setSelectedTone] = useState("Concise & Professional");
   const [isGenerating, setIsGenerating] = useState(false);
   const [refinePrompt, setRefinePrompt] = useState("");
@@ -26,10 +25,10 @@ export default function Replygenerator() {
       }, {
         withCredentials: true
       });
-      setDraftContent(response.data.draft);
+      setGeneratedDraft(response.data.draft);
     } catch (error) {
       console.error('Failed to generate AI reply:', error);
-      setDraftContent("Error connecting to AI Engine. Please try again.");
+      setGeneratedDraft("Error connecting to AI Engine. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -37,7 +36,7 @@ export default function Replygenerator() {
 
   const handleRefine = () => {
     if (!refinePrompt.trim()) return;
-    generateReply(selectedTone, refinePrompt, draftContent);
+    generateReply(selectedTone, refinePrompt, generatedDraft);
     setRefinePrompt("");
   };
 
@@ -102,8 +101,8 @@ export default function Replygenerator() {
           ) : null}
           <textarea 
             className="w-full h-full bg-transparent border-none outline-none resize-none text-slate-300 min-h-[120px]"
-            value={draftContent}
-            onChange={(e) => setDraftContent(e.target.value)}
+            value={generatedDraft}
+            onChange={(e) => setGeneratedDraft(e.target.value)}
             placeholder="AI generated draft will appear here..."
           />
         </div>

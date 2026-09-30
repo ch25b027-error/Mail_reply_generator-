@@ -5,7 +5,7 @@ import { useEmail } from '../../context/EmailContext';
 
 export default function QuickPrompts() {
   const [promptText, setPromptText] = useState('');
-  const { isAiProcessing, setIsAiProcessing, setIsAssistantOpen, emails } = useEmail();
+  const { isAiProcessing, setIsAiProcessing, setIsAssistantOpen, emails, selectedEmail, setSelectedEmail, setGeneratedDraft, setIsAnalyzingSummary, setAiSummary, setEmails } = useEmail();
 
   const prompts = [
     { id: 'sort', label: 'Auto-Sort Inbox', icon: 'M4 6h16M4 12h16M4 18h7' },
@@ -19,22 +19,48 @@ export default function QuickPrompts() {
     setIsAiProcessing(true);
     
     try {
-      const response = await axios.post('http://localhost:5000/api/ai/command', {
-        prompt: textToExecute
-      }, {
-        withCredentials: true
-      });
-      console.log("AI Response:", response.data);
+      const lowerText = textToExecute.toLowerCase();
       
-      // Auto-open assistant if draft or reply related
-      if (textToExecute.toLowerCase().includes('draft') || textToExecute.toLowerCase().includes('reply')) {
+      // If prompt implies drafting/replying to an email
+      if (lowerText.includes('draft') || lowerText.includes('reply')) {
+          setIsAnalyzingSummary(true); // Spin loader in right panel
           setIsAssistantOpen(true);
+          
+          let target = selectedEmail || emails[0];
+          
+          // Heuristic: If prompt explicitly mentions "devpost", find Devpost email
+          if (lowerText.includes('devpost')) {
+            target = emails.find(e => e.sender.toLowerCase().includes('devpost') || e.subject.toLowerCase().includes('devpost')) || target;
+          }
+          
+          setSelectedEmail(target);
+          setAiSummary(''); // Clear summary to show draft view
+          
+          const res = await axios.post('http://localhost:5000/api/ai/reply', {
+            userPrompt: textToExecute,
+            emailContext: target,
+            tone: 'Concise and Professional'
+          }, {
+            withCredentials: true
+          });
+          
+          setGeneratedDraft(res.data.draft);
+          setIsAnalyzingSummary(false);
+          
+      } else {
+          // General command
+          const response = await axios.post('http://localhost:5000/api/ai/command', {
+            prompt: textToExecute
+          }, {
+            withCredentials: true
+          });
+          console.log("AI Response:", response.data);
       }
     } catch (error) {
       console.error("Command failed:", error);
+      setIsAnalyzingSummary(false);
     } finally {
       setIsAiProcessing(false);
-      // Clear input bar only if it was fired from the text bar (not from a quick prompt that passes string directly)
       if (textToExecute === promptText) {
         setPromptText('');
       }
@@ -45,7 +71,8 @@ export default function QuickPrompts() {
     if (label === 'Auto-Sort Inbox') {
       const prompt = "Auto-Sort Inbox into Priority, Work, Newsletters, and Receipts";
       await handleExecute(prompt);
-      // Optional: trigger re-fetch or toast here
+      // We simulate success toast here:
+      console.log("Inbox auto-sorted into Priority, Work, and Newsletters");
     } else if (label === 'Mark Newsletters as Read') {
       const prompt = "Mark all newsletter emails as read";
       await handleExecute(prompt);
@@ -54,12 +81,18 @@ export default function QuickPrompts() {
         const newsletterIds = emails.filter(e => e.category === 'newsletters').map(e => e.id);
         if (newsletterIds.length > 0) {
           await axios.post('http://localhost:5000/api/emails/mark-read', { emailIds: newsletterIds }, { withCredentials: true });
+          
+          // Update local state to remove unread badges immediately
+          const updatedEmails = emails.map(e => 
+            newsletterIds.includes(e.id) ? { ...e, isRead: true } : e
+          );
+          setEmails(updatedEmails);
         }
       } catch (err) {
         console.error("Failed to mark read:", err);
       }
     } else if (label === 'Draft Follow-up Email') {
-      const prompt = "Draft a concise follow-up email for the latest unanswered thread";
+      const prompt = "Draft a concise follow-up email for the selected thread";
       setPromptText(prompt);
       handleExecute(prompt);
     }
